@@ -7,6 +7,7 @@ import PianoImage from "../../assets/images/piano.png";
 
 const MusicSelection = () => {
     const [currentPage, setCurrentPage] = useState(1); // Toggle between pages
+    const [selectedGenres, setSelectedGenres] = useState([]); // Track selected genres
     const genres = [
         "Country", "Electronic", "Funk", "Hip hop",
         "Jazz", "Latin", "Pop", "Punk",
@@ -14,10 +15,28 @@ const MusicSelection = () => {
     ];
 
     const instruments = [
-        { name: "Guitar", image: GuitarImage, color: "#C4EAFA", width: "w-80", height: "h-64" }, // Fixed height for Guitar
-        { name: "Ukulele", image: UkuleleImage, color: "#C8E3FF", width: "w-64", height: "h-64" }, // Fixed height for Ukulele
-        { name: "Piano", image: PianoImage, color: "#ADCCFF", width: "w-72", height: "h-64" }, // Fixed height for Piano
+        { name: "Guitar", image: GuitarImage, color: "#C4EAFA", width: "w-80", height: "h-64" },
+        { name: "Ukulele", image: UkuleleImage, color: "#C8E3FF", width: "w-64", height: "h-64" },
+        { name: "Piano", image: PianoImage, color: "#ADCCFF", width: "w-72", height: "h-64" },
     ];
+
+    // Handle genre selection
+    const handleGenreClick = (genre) => {
+        if (selectedGenres.includes(genre)) {
+            // If genre is already selected, remove it
+            setSelectedGenres(selectedGenres.filter(item => item !== genre));
+        } else if (selectedGenres.length < 3) {
+            // If less than 3 genres are selected, add the genre
+            setSelectedGenres([...selectedGenres, genre]);
+        }
+    };
+
+    // Handle Next button click
+    const handleNextClick = () => {
+        if (selectedGenres.length === 3) {
+            setCurrentPage(2); // Go to the instruments page
+        }
+    };
 
     return (
         <div className="text-center p-10 flex justify-center items-center min-h-screen bg-gray-100">
@@ -31,14 +50,20 @@ const MusicSelection = () => {
                 >
                     {/* Page 1 Content */}
                     {currentPage === 1 && (
-                        <div className="flex flex-col items-center">
+                        <div className="flex flex-col items-center mt-10"> {/* Added mt-10 here to move elements down */}
                             <h1 className="text-3xl font-bold mb-3 text-left w-full">Choose your interest..</h1>
                             <p className="text-gray-600 mb-6 text-left w-full">What rises the fuzziness in you</p>
                             <div className="grid grid-cols-4 gap-10 w-full px-4">
                                 {genres.map((genre, index) => (
                                     <button
                                         key={index}
-                                        className="px-10 py-6 border border-gray-300 rounded-lg hover:bg-gray-200 transition-all duration-200 text-lg"
+                                        className={`px-10 py-6 border border-gray-300 rounded-lg text-lg transition-all duration-200 ${
+                                            selectedGenres.includes(genre)
+                                                ? "bg-blue-200 text-blue-700"
+                                                : "hover:bg-gray-200 text-gray-700"
+                                        }`}
+                                        onClick={() => handleGenreClick(genre)}
+                                        disabled={selectedGenres.length >= 3 && !selectedGenres.includes(genre)} // Disable if 3 genres are selected and not clicked
                                     >
                                         {genre}
                                     </button>
@@ -100,6 +125,8 @@ const MusicSelection = () => {
                 <div className="mt-10 flex justify-end">
                     <button
                         className="px-14 py-5 text-sm font-bold text-white bg-gradient-to-r from-[#99CCFF] to-[#C6B7FF] rounded-full"
+                        onClick={handleNextClick}
+                        disabled={selectedGenres.length !== 3} // Disable Next button if less than 3 genres are selected
                     >
                         Next
                     </button>
