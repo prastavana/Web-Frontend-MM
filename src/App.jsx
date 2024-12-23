@@ -4,7 +4,7 @@ import GettingStarted from "./core/public/gettingstarted.jsx";
 
 
 // import Login from "./core/public/login"
-const Login =lazy(()=>import("./core/public/login"))
+// const Login =lazy(()=>import("./core/public/login"))
 
 
 
