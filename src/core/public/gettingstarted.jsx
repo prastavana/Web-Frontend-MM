@@ -8,6 +8,7 @@ import PianoImage from "../../assets/images/piano.png";
 const MusicSelection = () => {
     const [currentPage, setCurrentPage] = useState(1); // Toggle between pages
     const [selectedGenres, setSelectedGenres] = useState([]); // Track selected genres
+    const [selectedInstrument, setSelectedInstrument] = useState(null); // Track selected instrument
     const genres = [
         "Country", "Electronic", "Funk", "Hip hop",
         "Jazz", "Latin", "Pop", "Punk",
@@ -38,6 +39,11 @@ const MusicSelection = () => {
         }
     };
 
+    // Handle instrument selection
+    const handleInstrumentClick = (instrumentName) => {
+        setSelectedInstrument(instrumentName); // Update selected instrument
+    };
+
     return (
         <div className="text-center p-10 flex justify-center items-center min-h-screen bg-gray-100">
             <div className="w-full max-w-4xl px-2">
@@ -52,7 +58,7 @@ const MusicSelection = () => {
                     {currentPage === 1 && (
                         <div className="flex flex-col items-center mt-10"> {/* Added mt-10 here to move elements down */}
                             <h1 className="text-3xl font-bold mb-3 text-left w-full">Choose your interest..</h1>
-                            <p className="text-gray-600 mb-6 text-left w-full">What rises the fuzziness in you</p>
+                            <p className="text-gray-600 mb-6 text-left w-full">What rises the fuzziness in you. Please choose 3 genres</p>
                             <div className="grid grid-cols-4 gap-10 w-full px-4">
                                 {genres.map((genre, index) => (
                                     <button
@@ -86,9 +92,17 @@ const MusicSelection = () => {
                             <p className="text-gray-600 mb-10 mt-2 text-center w-full">Which sound moves you</p>
                             <div className="grid grid-cols-3 gap-8 w-full relative z-10">
                                 {instruments.map((instrument, index) => (
-                                    <div key={index} className="text-center">
+                                    <div
+                                        key={index}
+                                        className="text-center"
+                                        onClick={() => handleInstrumentClick(instrument.name)} // Handle instrument selection
+                                    >
                                         <div
-                                            className={`w-[260px] ${instrument.height} mx-auto rounded-md flex justify-center items-center`}
+                                            className={`w-[260px] ${instrument.height} mx-auto rounded-md flex justify-center items-center cursor-pointer transition-all duration-200 ${
+                                                selectedInstrument === instrument.name
+                                                    ? "border-4 border-blue-500" // Highlight selected instrument
+                                                    : "border-2 border-transparent"
+                                            }`}
                                             style={{ backgroundColor: instrument.color }}
                                         >
                                             <img
@@ -126,7 +140,7 @@ const MusicSelection = () => {
                     <button
                         className="px-14 py-5 text-sm font-bold text-white bg-gradient-to-r from-[#99CCFF] to-[#C6B7FF] rounded-full"
                         onClick={handleNextClick}
-                        disabled={selectedGenres.length !== 3} // Disable Next button if less than 3 genres are selected
+                        disabled={selectedGenres.length !== 3 || !selectedInstrument} // Disable Next button if no instrument is selected
                     >
                         Next
                     </button>
