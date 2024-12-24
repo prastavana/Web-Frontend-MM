@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom"
 import { lazy } from "react"
 import GettingStarted from "./core/public/gettingstarted.jsx";
+import Loginpage from "./core/public/loginpage.jsx";
 
 
 // import Login from "./core/public/login"
@@ -18,7 +19,7 @@ function App() {
 
   const publicRoutes=[
     // {path:"/",element:<Login/>},
-    {path:"/",element:<GettingStarted/>},
+    {path:"/",element:<Loginpage/>},
     {path:"*",element:<>unauthorized</>}
   ]
 
