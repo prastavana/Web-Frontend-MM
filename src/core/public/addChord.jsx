@@ -1,71 +1,98 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Sidebar from "./Sidebar"; // Adjust the path if needed
+import * as mammoth from "mammoth"; // Import Mammoth.js for DOCX parsing
 
 const AddChord = () => {
     const [songName, setSongName] = useState("");
     const [selectedInstrument, setSelectedInstrument] = useState("ukulele");
-    const [chords, setChords] = useState({ ukulele: "", guitar: "", piano: "" });
-    const [lyrics, setLyrics] = useState([{ line: "", chords: "" }]);
-    const [bulkInput, setBulkInput] = useState("");
+    const [lyrics, setLyrics] = useState([
+        { section: "Verse 1", lyric: "This is a verse.", chord: "C" }
+    ]);
+    const [isOpen, setIsOpen] = useState(true); // Control collapsible section state
+    const [docxFile, setDocxFile] = useState(null); // Handle docx file upload
+    const [ setUploadedLyrics] = useState([]); // Store lyrics and chords extracted from docx
 
-    // Handle bulk input parsing
-    const handleBulkInput = () => {
-        const lines = bulkInput.split("\n").map((line) => {
-            const [lyric, chords] = line.split("|"); // Adjust the delimiter if needed
-            return { line: lyric?.trim() || "", chords: chords?.trim() || "" };
+    // Handle instrument selection change
+    const handleInstrumentChange = (e) => {
+        setSelectedInstrument(e.target.value);
+    };
+
+    // Handle docx file upload and extract lyrics/chords from the file
+    const handleDocxUpload = (e) => {
+        const file = e.target.files[0];
+        setDocxFile(file); // Set the selected docx file
+
+        // Read and extract text from the DOCX file using Mammoth
+        const reader = new FileReader();
+        reader.onload = () => {
+            const arrayBuffer = reader.result;
+            mammoth.extractRawText({ arrayBuffer })
+                .then((result) => {
+                    const extractedText = result.value;
+                    const lyricsLines = parseDocxText(extractedText);
+                    setUploadedLyrics(lyricsLines); // Save extracted lyrics
+                })
+                .catch((err) => console.log(err));
+        };
+        reader.readAsArrayBuffer(file);
+    };
+
+    // Example of how to parse the DOCX text into lyric and chord lines
+    const parseDocxText = (text) => {
+        const lines = text.split("\n");
+        const parsedLyrics = [];
+        lines.forEach((line) => {
+            // Assuming that the DOCX file has a pattern like "Verse 1: [lyric] [chord]"
+            const parts = line.split(":");
+            if (parts.length === 2) {
+                const [section, rest] = parts;
+                const [lyric, chord] = rest.split(" ");
+                parsedLyrics.push({ section, lyric, chord });
+            }
         });
-        setLyrics(lines);
+        return parsedLyrics;
     };
 
-    // Handle file upload
-    const handleFileUpload = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const content = e.target.result;
-                const lines = content.split("\n").map((line) => {
-                    const [lyric, chords] = line.split("|");
-                    return { line: lyric?.trim() || "", chords: chords?.trim() || "" };
-                });
-                setLyrics(lines);
-            };
-            reader.readAsText(file);
-        }
-    };
-
-    // Handle individual lyrics and chords updates
+    // Handle lyrics and chords updates
     const handleLyricsChange = (index, field, value) => {
         const updatedLyrics = [...lyrics];
         updatedLyrics[index][field] = value;
         setLyrics(updatedLyrics);
     };
 
-    const handleInstrumentChange = (e) => {
-        setSelectedInstrument(e.target.value);
-    };
-
-    const handleChordsChange = (e) => {
-        setChords({ ...chords, [selectedInstrument]: e.target.value });
-    };
-
+    // Add new lyric and chord line
     const addLine = () => {
-        setLyrics([...lyrics, { line: "", chords: "" }]);
+        setLyrics([
+            ...lyrics,
+            { section: "", lyric: "", chord: "" }
+        ]);
     };
 
+    // Remove lyric and chord line
     const removeLine = (index) => {
         const updatedLyrics = lyrics.filter((_, i) => i !== index);
         setLyrics(updatedLyrics);
+    };
+
+    // Copy an existing line
+    const copyLine = (index) => {
+        const newLine = { ...lyrics[index] };
+        setLyrics([...lyrics, newLine]);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Song Data:", {
             songName,
-            chords,
             lyrics,
+            docxFile, // Include the docx file in the submission
         });
         // Add backend submission logic here
+    };
+
+    // Toggle collapsible section visibility
+    const toggleSection = () => {
+        setIsOpen(!isOpen);
     };
 
     return (
@@ -94,7 +121,7 @@ const AddChord = () => {
                         />
                     </div>
 
-                    {/* Dropdown for Instrument Selection */}
+                    {/* Instrument Selection */}
                     <div>
                         <label htmlFor="instrument" className="block text-gray-700 font-medium mb-2">
                             Select Instrument
@@ -111,75 +138,60 @@ const AddChord = () => {
                         </select>
                     </div>
 
-                    {/* Chords for Selected Instrument */}
-                    <div>
-                        <label htmlFor="chords" className="block text-gray-700 font-medium mb-2">
-                            Chords for {selectedInstrument.charAt(0).toUpperCase() + selectedInstrument.slice(1)}
-                        </label>
-                        <textarea
-                            id="chords"
-                            value={chords[selectedInstrument]}
-                            onChange={handleChordsChange}
-                            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder={`Enter chords for ${selectedInstrument}`}
-                        />
-                    </div>
-
-                    {/* Bulk Lyrics and Chords Input */}
-                    <div>
-                        <label htmlFor="bulkInput" className="block text-gray-700 font-medium mb-2">
-                            Bulk Lyrics and Chords (e.g., "Lyric | Chord")
-                        </label>
-                        <textarea
-                            id="bulkInput"
-                            value={bulkInput}
-                            onChange={(e) => setBulkInput(e.target.value)}
-                            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Enter lines in 'Lyric | Chord' format"
-                        />
-                        <button
-                            type="button"
-                            onClick={handleBulkInput}
-                            className="mt-3 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                        >
-                            Parse Input
-                        </button>
-                    </div>
-
                     {/* Lyrics and Chords Lines */}
                     <div>
-                        <h2 className="text-xl font-semibold mb-4">Lyrics and Chords</h2>
-                        {lyrics.map((item, index) => (
+                        <h2 className="text-xl font-semibold mb-4">
+                            Lyrics and Chords
+                            <button
+                                type="button"
+                                onClick={toggleSection}
+                                className="ml-4 text-blue-600 hover:underline"
+                            >
+                                {isOpen ? "Hide" : "Show"} Sections
+                            </button>
+                        </h2>
+
+                        {isOpen && lyrics.map((item, index) => (
                             <div key={index} className="mb-4 p-4 bg-white shadow rounded-lg">
                                 <div className="mb-2">
                                     <label className="block text-gray-700 font-medium">
-                                        Lyric Line {index + 1}
+                                        Section {index + 1} (e.g., Intro, Verse 1, Chorus)
                                     </label>
                                     <input
                                         type="text"
-                                        value={item.line}
-                                        onChange={(e) => handleLyricsChange(index, "line", e.target.value)}
+                                        value={item.section}
+                                        onChange={(e) => handleLyricsChange(index, "section", e.target.value)}
                                         className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter lyric line"
+                                        placeholder="Enter section name (e.g., Verse 1)"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-gray-700 font-medium">Chords</label>
+                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="docxFile">
+                                        Upload Chords and Lyrics (DOCX)
+                                    </label>
                                     <input
-                                        type="text"
-                                        value={item.chords}
-                                        onChange={(e) => handleLyricsChange(index, "chords", e.target.value)}
-                                        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter chords for this line"
+                                        type="file"
+                                        id="docxFile"
+                                        onChange={handleDocxUpload}
+                                        className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
-                                <button
-                                    type="button"
-                                    onClick={() => removeLine(index)}
-                                    className="mt-3 text-red-500 hover:underline"
-                                >
-                                    Remove Line
-                                </button>
+                                <div className="mt-3 space-x-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => removeLine(index)}
+                                        className="text-red-500 hover:underline"
+                                    >
+                                        Remove Line
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => copyLine(index)}
+                                        className="text-blue-500 hover:underline"
+                                    >
+                                        Copy Line
+                                    </button>
+                                </div>
                             </div>
                         ))}
                         <button
@@ -191,12 +203,15 @@ const AddChord = () => {
                         </button>
                     </div>
 
+                    {/* Updated File Upload Section */}
+
+
                     {/* Submit Button */}
                     <button
                         type="submit"
                         className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
-                        Submit Song
+                        Submit Chord
                     </button>
                 </form>
             </main>
