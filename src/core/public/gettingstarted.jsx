@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 // Importing images
 import GuitarImage from "../../assets/images/guitarwobg.png";
@@ -9,6 +10,8 @@ const MusicSelection = () => {
     const [currentPage, setCurrentPage] = useState(1); // Toggle between pages
     const [selectedGenres, setSelectedGenres] = useState([]); // Track selected genres
     const [selectedInstrument, setSelectedInstrument] = useState(null); // Track selected instrument
+    const navigate = useNavigate(); // Initialize navigate
+
     const genres = [
         "Country", "Electronic", "Funk", "Hip hop",
         "Jazz", "Latin", "Pop", "Punk",
@@ -24,18 +27,18 @@ const MusicSelection = () => {
     // Handle genre selection
     const handleGenreClick = (genre) => {
         if (selectedGenres.includes(genre)) {
-            // If genre is already selected, remove it
             setSelectedGenres(selectedGenres.filter(item => item !== genre));
         } else if (selectedGenres.length < 3) {
-            // If less than 3 genres are selected, add the genre
             setSelectedGenres([...selectedGenres, genre]);
         }
     };
 
     // Handle Next button click
     const handleNextClick = () => {
-        if (selectedGenres.length === 3) {
+        if (currentPage === 1 && selectedGenres.length === 3) {
             setCurrentPage(2); // Go to the instruments page
+        } else if (currentPage === 2 && selectedInstrument) {
+            navigate("/login"); // Navigate to the LoginPage
         }
     };
 
@@ -47,7 +50,6 @@ const MusicSelection = () => {
     return (
         <div className="text-center p-10 flex justify-center items-center min-h-screen bg-gray-100">
             <div className="w-full max-w-4xl px-2">
-                {/* Page Content */}
                 <div
                     className="w-full transition-transform duration-500"
                     style={{
@@ -56,7 +58,7 @@ const MusicSelection = () => {
                 >
                     {/* Page 1 Content */}
                     {currentPage === 1 && (
-                        <div className="flex flex-col items-center mt-10"> {/* Added mt-10 here to move elements down */}
+                        <div className="flex flex-col items-center mt-10">
                             <h1 className="text-3xl font-bold mb-3 text-left w-full">Choose your interest..</h1>
                             <p className="text-gray-600 mb-6 text-left w-full">What rises the fuzziness in you. Please choose 3 genres</p>
                             <div className="grid grid-cols-4 gap-10 w-full px-4">
@@ -69,7 +71,7 @@ const MusicSelection = () => {
                                                 : "hover:bg-gray-200 text-gray-700"
                                         }`}
                                         onClick={() => handleGenreClick(genre)}
-                                        disabled={selectedGenres.length >= 3 && !selectedGenres.includes(genre)} // Disable if 3 genres are selected and not clicked
+                                        disabled={selectedGenres.length >= 3 && !selectedGenres.includes(genre)}
                                     >
                                         {genre}
                                     </button>
@@ -90,17 +92,17 @@ const MusicSelection = () => {
                         <div className="flex flex-col items-center">
                             <h1 className="text-2xl font-bold mb-4 mt-10 text-center w-full">Choose an instrument...</h1>
                             <p className="text-gray-600 mb-10 mt-2 text-center w-full">Which sound moves you</p>
-                            <div className="grid grid-cols-3 gap-8 w-full relative z-10">
+                            <div className="grid grid-cols-3 gap-8 w-full">
                                 {instruments.map((instrument, index) => (
                                     <div
                                         key={index}
                                         className="text-center"
-                                        onClick={() => handleInstrumentClick(instrument.name)} // Handle instrument selection
+                                        onClick={() => handleInstrumentClick(instrument.name)}
                                     >
                                         <div
                                             className={`w-[260px] ${instrument.height} mx-auto rounded-md flex justify-center items-center cursor-pointer transition-all duration-200 ${
                                                 selectedInstrument === instrument.name
-                                                    ? "border-4 border-blue-500" // Highlight selected instrument
+                                                    ? "border-4 border-blue-500"
                                                     : "border-2 border-transparent"
                                             }`}
                                             style={{ backgroundColor: instrument.color }}
@@ -108,7 +110,7 @@ const MusicSelection = () => {
                                             <img
                                                 src={instrument.image}
                                                 alt={instrument.name}
-                                                className={`object-contain ${instrument.width} ${instrument.height}`} // Ensure image fits within the container
+                                                className={`object-contain ${instrument.width} ${instrument.height}`}
                                             />
                                         </div>
                                         <p className="mt-3 font-semibold text-gray-700">{instrument.name}</p>
@@ -119,28 +121,12 @@ const MusicSelection = () => {
                     )}
                 </div>
 
-                {/* Sliding Toggles */}
-                <div className="mt-12 flex justify-center gap-4">
-                    <div
-                        onClick={() => setCurrentPage(1)}
-                        className={`w-4 h-4 rounded-full cursor-pointer transition-all duration-200 ${
-                            currentPage === 1 ? "bg-black" : "bg-gray-400"
-                        }`}
-                    />
-                    <div
-                        onClick={() => setCurrentPage(2)}
-                        className={`w-4 h-4 rounded-full cursor-pointer transition-all duration-200 ${
-                            currentPage === 2 ? "bg-black" : "bg-gray-400"
-                        }`}
-                    />
-                </div>
-
                 {/* Next Button */}
                 <div className="mt-10 flex justify-end">
                     <button
                         className="px-14 py-5 text-sm font-bold text-white bg-gradient-to-r from-[#99CCFF] to-[#C6B7FF] rounded-full"
                         onClick={handleNextClick}
-                        disabled={selectedGenres.length !== 3 || !selectedInstrument} // Disable Next button if no instrument is selected
+                        disabled={(currentPage === 1 && selectedGenres.length !== 3) || (currentPage === 2 && !selectedInstrument)}
                     >
                         Next
                     </button>
@@ -151,3 +137,4 @@ const MusicSelection = () => {
 };
 
 export default MusicSelection;
+
