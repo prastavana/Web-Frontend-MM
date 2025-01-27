@@ -7,7 +7,7 @@ import Dashboard from "./core/public/dashboard.jsx";
 // import AdminDashboard from "./core/public/adminDashboard.jsx";
 // import ForgetPassword from "./core/public/forgetPassword.jsx";
 // import ResetPassword from "./core/public/resetPassword.jsx";
-// import FirstPage from "./core/public/firstPage.jsx";
+import FirstPage from "./core/public/firstPage.jsx";
 // import AddChord from "./core/public/addChord.jsx";
 
 
@@ -21,7 +21,7 @@ function App() {
   // Public Routes
   const publicRoutes = [
     { path: "/", element: <Gettingstarted /> },
-    // { path: "/firstpage", element: <FirstPage /> },
+    { path: "/firstpage", element: <FirstPage /> },
     { path: "/login", element: <LoginPage /> },
     { path: "/register", element: <RegisterPage /> },
     { path: "/dashboard", element: <Dashboard /> },
