@@ -4,7 +4,7 @@ import LoginPage from "./core/public/loginpage.jsx";
 import RegisterPage from "./core/public/register.jsx";
 import Gettingstarted from "./core/public/gettingstarted.jsx";
 import Dashboard from "./core/public/dashboard.jsx";
-// import AdminDashboard from "./core/public/adminDashboard.jsx";
+import AdminDashboard from "./core/public/adminDashboard.jsx";
 // import ForgetPassword from "./core/public/forgetPassword.jsx";
 // import ResetPassword from "./core/public/resetPassword.jsx";
 import FirstPage from "./core/public/firstPage.jsx";
@@ -25,7 +25,7 @@ function App() {
     { path: "/login", element: <LoginPage /> },
     { path: "/register", element: <RegisterPage /> },
     { path: "/dashboard", element: <Dashboard /> },
-    // { path: "/admindash", element: <AdminDashboard /> },
+    { path: "/admindash", element: <AdminDashboard /> },
     // { path: "/forgetPassword", element: <ForgetPassword /> },
     // { path: "/resetPassword", element: <ResetPassword /> },
     // { path: "/addChord", element: <AddChord /> },
