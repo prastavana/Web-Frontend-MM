@@ -8,7 +8,7 @@ import AdminDashboard from "./core/public/adminDashboard.jsx";
 import ForgetPassword from "./core/public/forgetPassword.jsx";
 import ResetPassword from "./core/public/resetPassword.jsx";
 import FirstPage from "./core/public/firstPage.jsx";
-// import AddChord from "./core/public/addChord.jsx";
+import AddChord from "./core/public/addChord.jsx";
 
 
 const Layout = lazy(() => import("./core/private/layout"));
@@ -28,7 +28,7 @@ function App() {
     { path: "/admindash", element: <AdminDashboard /> },
     { path: "/forgetPassword", element: <ForgetPassword /> },
     { path: "/resetPassword", element: <ResetPassword /> },
-    // { path: "/addChord", element: <AddChord /> },
+    { path: "/addChord", element: <AddChord /> },
     { path: "*", element: <>Page not found</> },
   ];
 
