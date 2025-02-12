@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Sidebar from "./sidebar.jsx";
 
 export default function Lesson() {
     const [lessons, setLessons] = useState([]);
@@ -24,6 +25,7 @@ export default function Lesson() {
 
     return (
         <div className="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen">
+            <Sidebar/>
             <div className="flex justify-center items-center w-full">
                 <div className="p-6 bg-white rounded-lg shadow-md w-[80%] mt-10">
                     <h2 className="text-2xl font-bold mb-4">Available {selectedCategory} Lessons</h2>
