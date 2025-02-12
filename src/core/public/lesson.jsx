@@ -24,10 +24,10 @@ export default function Lesson() {
     const filteredLessons = lessons.filter((lesson) => lesson.category === selectedCategory);
 
     return (
-        <div className="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen">
-            <Sidebar/>
-            <div className="flex justify-center items-center w-full">
-                <div className="p-6 bg-white rounded-lg shadow-md w-[80%] mt-10">
+        <div className="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen flex items-start justify-center">
+            <Sidebar />
+            <main className="flex-1 p-6 flex justify-center items-start mt-4">
+                <div className="p-6 bg-white rounded-lg shadow-md w-[90%] mt-8 min-h-[550px] ml-32"> {/* Increased margin to ml-32 */}
                     <h2 className="text-2xl font-bold mb-4">Available {selectedCategory} Lessons</h2>
 
                     {/* Category Text Links below the title, aligned to the left */}
@@ -80,7 +80,15 @@ export default function Lesson() {
                         )}
                     </div>
                 </div>
-            </div>
+                {/* Right Sidebar with Profile Icon */}
+                <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
+                    <img
+                        src="src/assets/images/nezuko.jpg"
+                        alt="Profile"
+                        className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                    />
+                </aside>
+            </main>
         </div>
     );
 }
