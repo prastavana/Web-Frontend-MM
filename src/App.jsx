@@ -9,6 +9,9 @@ import ForgetPassword from "./core/public/forgetPassword.jsx";
 import ResetPassword from "./core/public/resetPassword.jsx";
 import FirstPage from "./core/public/firstPage.jsx";
 import AddChord from "./core/public/addChord.jsx";
+import AddLesson from "./core/public/addLesson.jsx";
+import AddPracticeSession from "./core/public/addPracticeSessions.jsx";
+import Lesson from "./core/public/lesson.jsx";
 
 
 const Layout = lazy(() => import("./core/private/layout"));
@@ -29,6 +32,9 @@ function App() {
     { path: "/forgetPassword", element: <ForgetPassword /> },
     { path: "/resetPassword", element: <ResetPassword /> },
     { path: "/addChord", element: <AddChord /> },
+    { path: "/addLesson", element: <AddLesson /> },
+    { path: "/addPracticeSession", element: <AddPracticeSession /> },
+    { path: "/lesson", element: <Lesson /> },
     { path: "*", element: <>Page not found</> },
   ];
 

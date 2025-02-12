@@ -1,83 +1,111 @@
-import React from 'react';
-// Import the image
-import untitledDesign from '../../assets/images/Untitled_design.png';
+import React from "react";
 
-const Dashboard = () => {
+export default function Dashboard() {
     return (
-        <div
-            className="min-h-screen flex"
-            style={{
-                background: "linear-gradient(to bottom right, #CCE6FF 35%, #E0D9FF, #D9D4E6, #BFBACD)"
-            }}
-        >
+        <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
             {/* Sidebar */}
-            <aside className="w-64 bg-white shadow-lg rounded-lg ml-4 mt-6 mb-7">
-                <div className="p-6">
-                    <h1 className="text-2xl font-bold text-blue-600">Melody Mentor</h1>
-                </div>
-                <nav className="mt-8">
-                    <ul>
-                        <li className="flex items-center p-4 text-gray-700 hover:bg-blue-100">
-                            <span className="material-icons-outlined">home</span>
-                            <span className="ml-4">Home</span>
-                        </li>
-                        <li className="flex items-center p-4 text-gray-700 hover:bg-blue-100">
-                            <span className="material-icons-outlined">menu_book</span>
-                            <span className="ml-4">Lessons</span>
-                        </li>
-                        <li className="flex items-center p-4 text-gray-700 hover:bg-blue-100">
-                            <span className="material-icons-outlined">music_note</span>
-                            <span className="ml-4">Practice Sessions</span>
-                        </li>
-                        <li className="flex items-center p-4 text-gray-700 hover:bg-blue-100">
-                            <span className="material-icons-outlined">queue_music</span>
-                            <span className="ml-4">Chords & Lyrics</span>
-                        </li>
-                        <li className="flex items-center p-4 text-gray-700 hover:bg-blue-100">
-                            <span className="material-icons-outlined">tune</span>
-                            <span className="ml-4">Tuner</span>
-                        </li>
-                    </ul>
+            <aside className="w-1/6 bg-white bg-opacity-10 backdrop-blur-lg p-6 flex flex-col">
+                <h1 className="text-xl font-bold mb-8">🎵 Melody Mentor</h1>
+                <nav className="flex flex-col gap-4">
+                    <div className="space-y-4">
+                        <h2 className="text-sm font-semibold text-gray-500 uppercase">
+                            Features
+                        </h2>
+                        <ul className="space-y-4">
+                            <li>Home</li>
+                            <li>Lessons</li>
+                            <li>Practice sections</li>
+                            <li>Chords & Lyrics</li>
+                            <li>Tuner</li>
+                        </ul>
+                    </div>
+                    <div className="mt-8 space-y-4">
+                        <h2 className="text-sm font-semibold text-gray-500 uppercase">
+                            Favourites
+                        </h2>
+                        <ul className="space-y-4">
+                            <li>Liked Lesson</li>
+                            <li>Liked Song</li>
+                        </ul>
+                    </div>
                 </nav>
-                <div className="absolute bottom-12 left-7">
-                    <button className="flex items-center text-red-600 hover:text-red-800">
-                        <span className="material-icons-outlined">logout</span>
-                        <span className="ml-2">Logout</span>
-                    </button>
-                </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 p-8">
-                <div className="text-2xl font-semibold text-gray-700">
-                    Hello, Pasta! 👋
-                </div>
-                <p className="text-gray-500">Welcome back, explore the lessons</p>
+            <main className="flex-1 p-6 flex justify-center items-start mt-6">
+                <div className="bg-white bg-opacity-60 backdrop-blur-lg rounded-3xl shadow-lg p-8 w-full max-w-7xl h-[85vh]">
 
-                <div className="relative mt-6 h-64 w-full rounded-l-3xl overflow-hidden bg-gradient-to-r from-purple-400 to-purple-500 text-white shadow-lg">
-                    {/* Background Image */}
-                    <img
-                        src={untitledDesign}
-                        alt="Guitar and amplifier"
-                        className="absolute top-0 left-0 w-full h-full object-cover"
-                    />
+                    {/* Header with Search */}
+                    <header className="flex justify-between items-center mb-6">
+                        <input
+                            type="text"
+                            placeholder="Search"
+                            className="px-4 py-2 rounded-lg bg-gray-200 bg-opacity-70 w-1/3"
+                        />
+                        <span className="text-gray-700">Hello, Prasta</span>
+                    </header>
 
-                    {/* Text Content */}
-                    <div
-                        className="absolute inset-0 flex flex-col justify-center items-start p-8 bg-black bg-opacity-50">
-                        <h2 className="text-xl font-bold">Have not tried the lessons yet?</h2>
-                        <p className="mt-2">
-                            Dive into the world of music at free, learn different instruments at our ease.
-                        </p>
-                        <button
-                            className="mt-4 py-2 px-4 rounded text-white bg-gradient-to-r from-[#99CCFF] via-[#C6B7FE] to-[#766E98] hover:from-purple-500 hover:to-purple-700 shadow-md">
-                            Get Started
-                        </button>
+                    {/* Promo Section */}
+                    <div className="relative mt-8 h-52 w-full rounded-l-3xl overflow-hidden bg-gradient-to-r from-purple-400 to-purple-500 text-white shadow-lg">
+                        <img
+                            src="src/assets/images/untitled_design.png"
+                            alt="Guitar and amplifier"
+                            className="absolute top-0 left-0 w-full h-full object-cover"
+                        />
+
+                        <div className="absolute inset-0 flex flex-col justify-center items-start p-8 bg-black bg-opacity-50">
+                            <h2 className="text-xl font-bold">Have not tried the lessons yet?</h2>
+                            <p className="mt-2">
+                                Dive into the world of music for free, learn different instruments at your own pace.
+                            </p>
+                            <button className="mt-4 py-2 px-4 rounded text-white bg-gradient-to-r from-[#99CCFF] via-[#C6B7FE] to-[#766E98] hover:from-purple-500 hover:to-purple-700 shadow-md">
+                                Get Started
+                            </button>
+                        </div>
                     </div>
+                    {/* Flex Container for the two boxes */}
+                    <div className="mt-12 flex gap-8">
+                        {/* Play Along Song with Chords - Increased width */}
+                        <div className="relative h-48 w-1/2 rounded-xl overflow-hidden bg-gradient-to-r from-blue-400 to-blue-500 text-white shadow-lg">
+                            <img
+                                src="src/assets/images/guitar2.jpg"
+                                alt="Play along song"
+                                className="absolute top-0 left-0 w-full h-full object-cover object-center"
+                            />
+
+                            <div className="absolute inset-0 flex flex-col justify-center items-start p-6 bg-black bg-opacity-50">
+                                <h2 className="text-lg font-bold">Play along song with chords</h2>
+                            </div>
+                        </div>
+
+                        {/* Tune Your Instruments - Increased width */}
+                        <div className="relative h-48 w-1/2 rounded-xl overflow-hidden bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg">
+                            <img
+                                src="src/assets/images/pick.jpg"
+                                alt="Tune your instrument"
+                                className="absolute top-0 left-0 w-full h-full object-cover object-center"
+                            />
+
+                            <div className="absolute inset-0 flex flex-col justify-center items-start p-6 bg-black bg-opacity-50">
+                                <h2 className="text-lg font-bold">Tune your instruments easily</h2>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
                 </div>
             </main>
+
+            {/* Right Sidebar with Profile Icon */}
+            <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
+                <img
+                    src="src/assets/images/nezuko.jpg"
+                    alt="Profile"
+                    className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                />
+            </aside>
         </div>
     );
-};
-
-export default Dashboard;
+}

@@ -1,6 +1,7 @@
-import { useState } from "react";
-import Sidebar from "./Sidebar"; // Adjust the path if needed
+import React, { useState } from "react";
 import * as mammoth from "mammoth"; // Import Mammoth.js for DOCX parsing
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import AdminSidebar from "./adminSidebar.jsx";
 
 const AddChord = () => {
     const [songName, setSongName] = useState("");
@@ -8,21 +9,26 @@ const AddChord = () => {
     const [lyrics, setLyrics] = useState([
         { section: "Verse 1", lyric: "This is a verse.", chord: "C" }
     ]);
-    const [isOpen, setIsOpen] = useState(true); // Control collapsible section state
-    const [docxFile, setDocxFile] = useState(null); // Handle docx file upload
-    const [ setUploadedLyrics] = useState([]); // Store lyrics and chords extracted from docx
+    const [isOpen, setIsOpen] = useState(true);
+    const [docxFile, setDocxFile] = useState(null);
+    // These states for uploaded lyrics are defined but not used in this example
+    const [setUploadedLyrics] = useState([]);
+    const [uploadedLyrics] = useState([]);
+    const [chordDiagrams, setChordDiagrams] = useState([]);
 
-    // Handle instrument selection change
     const handleInstrumentChange = (e) => {
         setSelectedInstrument(e.target.value);
     };
 
-    // Handle docx file upload and extract lyrics/chords from the file
+    const handleChordDiagramUpload = (e) => {
+        const files = Array.from(e.target.files);
+        setChordDiagrams((prevFiles) => [...prevFiles, ...files]);
+    };
+
     const handleDocxUpload = (e) => {
         const file = e.target.files[0];
-        setDocxFile(file); // Set the selected docx file
+        setDocxFile(file);
 
-        // Read and extract text from the DOCX file using Mammoth
         const reader = new FileReader();
         reader.onload = () => {
             const arrayBuffer = reader.result;
@@ -30,19 +36,17 @@ const AddChord = () => {
                 .then((result) => {
                     const extractedText = result.value;
                     const lyricsLines = parseDocxText(extractedText);
-                    setUploadedLyrics(lyricsLines); // Save extracted lyrics
+                    setUploadedLyrics(lyricsLines);
                 })
                 .catch((err) => console.log(err));
         };
         reader.readAsArrayBuffer(file);
     };
 
-    // Example of how to parse the DOCX text into lyric and chord lines
     const parseDocxText = (text) => {
         const lines = text.split("\n");
         const parsedLyrics = [];
         lines.forEach((line) => {
-            // Assuming that the DOCX file has a pattern like "Verse 1: [lyric] [chord]"
             const parts = line.split(":");
             if (parts.length === 2) {
                 const [section, rest] = parts;
@@ -53,167 +57,217 @@ const AddChord = () => {
         return parsedLyrics;
     };
 
-    // Handle lyrics and chords updates
     const handleLyricsChange = (index, field, value) => {
         const updatedLyrics = [...lyrics];
         updatedLyrics[index][field] = value;
         setLyrics(updatedLyrics);
     };
 
-    // Add new lyric and chord line
     const addLine = () => {
-        setLyrics([
-            ...lyrics,
-            { section: "", lyric: "", chord: "" }
-        ]);
+        setLyrics([...lyrics, { section: "", lyric: "", chord: "" }]);
     };
 
-    // Remove lyric and chord line
     const removeLine = (index) => {
         const updatedLyrics = lyrics.filter((_, i) => i !== index);
         setLyrics(updatedLyrics);
     };
 
-    // Copy an existing line
     const copyLine = (index) => {
         const newLine = { ...lyrics[index] };
-        setLyrics([...lyrics, newLine]);
+        // Add the new line at the beginning (above the copied line)
+        setLyrics([newLine, ...lyrics]);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Song Data:", {
-            songName,
-            lyrics,
-            docxFile, // Include the docx file in the submission
-        });
-        // Add backend submission logic here
+
+        // Display success message
+        alert("Chords Added");
+
+        // Optionally, you can clear the form data or log the song data
+        console.log("Song Data:", { songName, lyrics, docxFile, chordDiagrams });
+
+        // Optionally, reset the form (if you want to clear the input fields after submission)
+        setSongName("");
+        setLyrics([{ section: "Verse 1", lyric: "This is a verse.", chord: "C" }]);
+        setChordDiagrams([]);
+        setDocxFile(null);
     };
 
-    // Toggle collapsible section visibility
+
+
     const toggleSection = () => {
         setIsOpen(!isOpen);
     };
 
     return (
-        <div
-            className="flex min-h-screen"
-            style={{
-                background: "linear-gradient(to bottom right, #CCE6FF 35%, #E0D9FF, #D9D4E6, #BFBACD)",
-            }}
-        >
-            <Sidebar />
-            <main className="flex-1 p-6">
-                <h1 className="text-3xl font-bold mb-6">Add Chord</h1>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Song Name */}
-                    <div>
-                        <label htmlFor="songName" className="block text-gray-700 font-medium mb-2">
-                            Song Title
-                        </label>
-                        <input
-                            type="text"
-                            id="songName"
-                            value={songName}
-                            onChange={(e) => setSongName(e.target.value)}
-                            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Enter song title"
-                        />
-                    </div>
+        <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
+            <AdminSidebar />
+            <main className="flex-1 p-1 flex justify-center items-center">
+                <div className="w-11/12 max-xl bg-white bg-opacity-65 backdrop-blur-lg p-8 rounded-lg shadow-lg h-full flex flex-col">
+                    <h1 className="text-2xl font-bold mb-4">Add Chord</h1>
+                    <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto space-y-6">
+                        {/* Song Name */}
+                        <div>
+                            <label htmlFor="songName" className="block text-gray-700 font-medium mb-2">
+                                Song Title
+                            </label>
+                            <input
+                                type="text"
+                                id="songName"
+                                value={songName}
+                                onChange={(e) => setSongName(e.target.value)}
+                                className="w-full p-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter song title"
+                            />
+                        </div>
 
-                    {/* Instrument Selection */}
-                    <div>
-                        <label htmlFor="instrument" className="block text-gray-700 font-medium mb-2">
-                            Select Instrument
-                        </label>
-                        <select
-                            id="instrument"
-                            value={selectedInstrument}
-                            onChange={handleInstrumentChange}
-                            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="ukulele">Ukulele</option>
-                            <option value="guitar">Guitar</option>
-                            <option value="piano">Piano</option>
-                        </select>
-                    </div>
-
-                    {/* Lyrics and Chords Lines */}
-                    <div>
-                        <h2 className="text-xl font-semibold mb-4">
-                            Lyrics and Chords
-                            <button
-                                type="button"
-                                onClick={toggleSection}
-                                className="ml-4 text-blue-600 hover:underline"
+                        {/* Instrument Selection */}
+                        <div>
+                            <label htmlFor="instrument" className="block text-gray-700 font-medium mb-2">
+                                Select Instrument
+                            </label>
+                            <select
+                                id="instrument"
+                                value={selectedInstrument}
+                                onChange={handleInstrumentChange}
+                                className="w-full p-2.5 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
-                                {isOpen ? "Hide" : "Show"} Sections
-                            </button>
-                        </h2>
+                                <option value="ukulele">Ukulele</option>
+                                <option value="guitar">Guitar</option>
+                                <option value="piano">Piano</option>
+                            </select>
+                        </div>
 
-                        {isOpen && lyrics.map((item, index) => (
-                            <div key={index} className="mb-4 p-4 bg-white shadow rounded-lg">
-                                <div className="mb-2">
-                                    <label className="block text-gray-700 font-medium">
-                                        Section {index + 1} (e.g., Intro, Verse 1, Chorus)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={item.section}
-                                        onChange={(e) => handleLyricsChange(index, "section", e.target.value)}
-                                        className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter section name (e.g., Verse 1)"
-                                    />
+                        {/* Chord Diagram Upload */}
+                        <div>
+                            <label className="block text-gray-700 font-medium mb-2">
+                                Upload Chord Diagram(s) (Max 10)
+                            </label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                onChange={handleChordDiagramUpload}
+                                className="w-full p-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            {chordDiagrams.length > 0 && (
+                                <div className="mt-4">
+                                    <p className="text-gray-700">
+                                        {chordDiagrams.length} file{chordDiagrams.length > 1 ? "s" : ""} selected:
+                                    </p>
+                                    <ul className="list-disc list-inside">
+                                        {chordDiagrams.map((file, idx) => (
+                                            <li key={idx} className="text-gray-700">{file.name}</li>
+                                        ))}
+                                    </ul>
                                 </div>
-                                <div>
-                                    <label className="block text-gray-700 font-medium mb-2" htmlFor="docxFile">
-                                        Upload Chords and Lyrics (DOCX)
-                                    </label>
-                                    <input
-                                        type="file"
-                                        id="docxFile"
-                                        onChange={handleDocxUpload}
-                                        className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    />
-                                </div>
-                                <div className="mt-3 space-x-3">
-                                    <button
-                                        type="button"
-                                        onClick={() => removeLine(index)}
-                                        className="text-red-500 hover:underline"
-                                    >
-                                        Remove Line
-                                    </button>
-                                    <button
-                                        type="button"
-                                        onClick={() => copyLine(index)}
-                                        className="text-blue-500 hover:underline"
-                                    >
-                                        Copy Line
-                                    </button>
-                                </div>
+                            )}
+                        </div>
+
+                        {/* Lyrics and Chords Section */}
+                        <div>
+                            <h2 className="text-xl font-semibold mb-4">
+                                Lyrics and Chords
+                                <button
+                                    type="button"
+                                    onClick={toggleSection}
+                                    className="ml-20 text-gray-600 hover:underline"
+                                >
+                                    <i className={`fa ${isOpen ? "fa-chevron-down" : "fa-chevron-up"}`}></i>
+                                </button>
+                            </h2>
+
+                            {/* Scrollable lyrics section */}
+                            <div className="overflow-y-auto max-h-[400px]">
+                                {isOpen &&
+                                    lyrics.map((item, index) => (
+                                        <div key={index} className="mb-4 p-4 bg-white shadow rounded-lg">
+                                            <div className="mb-2">
+                                                <label className="block text-gray-700 font-medium">
+                                                    Section {index + 1} (e.g., Intro, Verse 1, Chorus)
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={item.section}
+                                                    onChange={(e) =>
+                                                        handleLyricsChange(index, "section", e.target.value)
+                                                    }
+                                                    className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    placeholder="Enter section name (e.g., Verse 1)"
+                                                />
+                                            </div>
+                                            <div>
+                                                <h2 className="block text-gray-700 font-medium">
+                                                    Upload DOCX File with Lyrics and Chords
+                                                </h2>
+
+                                                <input
+                                                    type="file"
+                                                    accept=".docx"
+                                                    onChange={handleDocxUpload}
+                                                    className="w-full p-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                />
+
+                                                {/* Display Parsed Lyrics */}
+                                                <div className="overflow-y-auto max-h-[400px] mt-4">
+                                                    {uploadedLyrics.length > 0 &&
+                                                        uploadedLyrics.map((item, index) => (
+                                                            <div
+                                                                key={index}
+                                                                className="mb-4 p-4 bg-white shadow rounded-lg"
+                                                            >
+                                                                <div className="mb-2">
+                                                                    <label className="block text-gray-700 font-medium">
+                                                                        Lyrics
+                                                                    </label>
+                                                                    <p className="text-gray-700">{item.lyric}</p>
+                                                                </div>
+                                                                <div>
+                                                                    <label className="block text-gray-700 font-medium">
+                                                                        Chords
+                                                                    </label>
+                                                                    <p className="text-gray-700">
+                                                                        {item.chord1} {item.chord2}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-3 space-x-3">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removeLine(index)}
+                                                    className="text-red-500 hover:underline"
+                                                >
+                                                    Remove Line
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => copyLine(index)}
+                                                    className="text-blue-500 hover:underline"
+                                                >
+                                                    Copy Line
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
                             </div>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={addLine}
-                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-                        >
-                            Add Line
-                        </button>
-                    </div>
+                        </div>
 
-                    {/* Updated File Upload Section */}
-
-
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                        Submit Chord
-                    </button>
-                </form>
+                        {/* Submit Button */}
+                        <div className="mt-4">
+                            <button
+                                type="submit"
+                                className="w-fit px-4 py-2 bg-blue-300 text-white rounded-lg hover:bg-blue-700"
+                            >
+                                Submit Chord
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </main>
         </div>
     );
