@@ -12,6 +12,7 @@ import AddChord from "./core/public/addChord.jsx";
 import AddLesson from "./core/public/addLesson.jsx";
 import AddPracticeSession from "./core/public/addPracticeSessions.jsx";
 import Lesson from "./core/public/lesson.jsx";
+import PracticeSession from "./core/public/practiceSessions.jsx";
 
 
 const Layout = lazy(() => import("./core/private/layout"));
@@ -35,6 +36,7 @@ function App() {
     { path: "/addLesson", element: <AddLesson /> },
     { path: "/addPracticeSession", element: <AddPracticeSession /> },
     { path: "/lesson", element: <Lesson /> },
+    { path: "/practiceSession", element: <PracticeSession /> },
     { path: "*", element: <>Page not found</> },
   ];
 
