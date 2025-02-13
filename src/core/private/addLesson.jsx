@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AdminSidebar from "./adminSidebar.jsx";
+import AdminSidebar from "../../components/adminSidebar.jsx";
 
 export default function AddLesson() {
     const [lesson, setLesson] = useState({

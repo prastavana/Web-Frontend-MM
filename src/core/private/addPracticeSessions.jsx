@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AdminSidebar from "./adminSidebar.jsx";
+import AdminSidebar from "../../components/adminSidebar.jsx";
 
 export default function AddPracticeSession() {
     const [session, setSession] = useState({

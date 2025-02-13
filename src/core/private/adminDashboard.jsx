@@ -1,5 +1,5 @@
 import React from 'react';
-import AdminSidebar from "./adminSidebar.jsx";
+import AdminSidebar from "../../components/adminSidebar.jsx";
 
 const AdminDashboard = () => {
     return (

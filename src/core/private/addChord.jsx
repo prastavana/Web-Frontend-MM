@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import * as mammoth from "mammoth"; // Import Mammoth.js for DOCX parsing
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import AdminSidebar from "./adminSidebar.jsx";
+import AdminSidebar from "../../components/adminSidebar.jsx";
 
 const AddChord = () => {
     const [songName, setSongName] = useState("");

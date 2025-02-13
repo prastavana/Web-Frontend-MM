@@ -1,21 +1,22 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import {  Suspense } from "react";
 import LoginPage from "./core/public/loginpage.jsx";
 import RegisterPage from "./core/public/register.jsx";
 import Gettingstarted from "./core/public/gettingstarted.jsx";
 import Dashboard from "./core/public/dashboard.jsx";
-import AdminDashboard from "./core/public/adminDashboard.jsx";
+import AdminDashboard from "./core/private/adminDashboard.jsx";
 import ForgetPassword from "./core/public/forgetPassword.jsx";
 import ResetPassword from "./core/public/resetPassword.jsx";
 import FirstPage from "./core/public/firstPage.jsx";
-import AddChord from "./core/public/addChord.jsx";
-import AddLesson from "./core/public/addLesson.jsx";
-import AddPracticeSession from "./core/public/addPracticeSessions.jsx";
+import AddChord from "./core/private/addChord.jsx";
+import AddLesson from "./core/private/addLesson.jsx";
+import AddPracticeSession from "./core/private/addPracticeSessions.jsx";
 import Lesson from "./core/public/lesson.jsx";
 import PracticeSession from "./core/public/practiceSessions.jsx";
+import ChordAndLyricPage from "./core/public/chordAndLyric.jsx";
 
 
-const Layout = lazy(() => import("./core/private/layout"));
+
 
 function App() {
   // Placeholder for authentication state; replace with actual logic
@@ -29,20 +30,20 @@ function App() {
     { path: "/login", element: <LoginPage /> },
     { path: "/register", element: <RegisterPage /> },
     { path: "/dashboard", element: <Dashboard /> },
-    { path: "/admindash", element: <AdminDashboard /> },
     { path: "/forgetPassword", element: <ForgetPassword /> },
     { path: "/resetPassword", element: <ResetPassword /> },
-    { path: "/addChord", element: <AddChord /> },
-    { path: "/addLesson", element: <AddLesson /> },
-    { path: "/addPracticeSession", element: <AddPracticeSession /> },
     { path: "/lesson", element: <Lesson /> },
     { path: "/practiceSession", element: <PracticeSession /> },
+    { path: "/chords", element: <ChordAndLyricPage /> },
     { path: "*", element: <>Page not found</> },
   ];
 
   // Private/Admin Routes
   const privateRoutes = [
-    { path: "/admin", element: <Layout /> },
+    { path: "/admindash", element: <AdminDashboard /> },
+    { path: "/addChord", element: <AddChord /> },
+    { path: "/addLesson", element: <AddLesson /> },
+    { path: "/addPracticeSession", element: <AddPracticeSession /> },
     { path: "*", element: <>Unauthorized</> },
   ];
 

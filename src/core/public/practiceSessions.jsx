@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Sidebar from "./sidebar.jsx";
+import Sidebar from "../../components/sidebar.jsx";
 
 export default function PracticeSession() {
     const [sessions, setSessions] = useState([]);
