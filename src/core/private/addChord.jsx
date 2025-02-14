@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import * as mammoth from "mammoth"; // Import Mammoth.js for DOCX parsing
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import AdminSidebar from "../../components/adminSidebar.jsx";
+import axios from 'axios'; // Assuming Axios is used for API calls
 
 const AddChord = () => {
     const [songName, setSongName] = useState("");
@@ -11,9 +12,7 @@ const AddChord = () => {
     ]);
     const [isOpen, setIsOpen] = useState(true);
     const [docxFile, setDocxFile] = useState(null);
-    // These states for uploaded lyrics are defined but not used in this example
-    const [setUploadedLyrics] = useState([]);
-    const [uploadedLyrics] = useState([]);
+    const [uploadedLyrics, setUploadedLyrics] = useState([]);
     const [chordDiagrams, setChordDiagrams] = useState([]);
 
     const handleInstrumentChange = (e) => {
@@ -74,27 +73,53 @@ const AddChord = () => {
 
     const copyLine = (index) => {
         const newLine = { ...lyrics[index] };
-        // Add the new line at the beginning (above the copied line)
         setLyrics([newLine, ...lyrics]);
     };
 
-    const handleSubmit = (e) => {
+    // In AddChord.jsx (frontend)
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Display success message
-        alert("Chords Added");
+        const formData = new FormData();
+        formData.append("songName", songName);
+        formData.append("selectedInstrument", selectedInstrument);
 
-        // Optionally, you can clear the form data or log the song data
-        console.log("Song Data:", { songName, lyrics, docxFile, chordDiagrams });
+        // Append lyrics data
+        lyrics.forEach((line, index) => {
+            formData.append(`lyrics[${index}][section]`, line.section);
+            formData.append(`lyrics[${index}][lyric]`, line.lyric);
+            formData.append(`lyrics[${index}][chord]`, line.chord);
+        });
 
-        // Optionally, reset the form (if you want to clear the input fields after submission)
-        setSongName("");
-        setLyrics([{ section: "Verse 1", lyric: "This is a verse.", chord: "C" }]);
-        setChordDiagrams([]);
-        setDocxFile(null);
+        // Append chord diagrams
+        chordDiagrams.forEach((file) => {
+            formData.append("chordDiagrams", file);
+        });
+
+        // Append DOCX file
+        if (docxFile) {
+            formData.append("docxFile", docxFile);
+        }
+
+        try {
+            const response = await axios.post("http://localhost:3000/api/songs/chords", formData, {  // Updated URL to /api/songs/chords
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            if (response.status === 200) {
+                alert("Chords Added Successfully!");
+                setSongName("");
+                setLyrics([{ section: "Verse 1", lyric: "This is a verse.", chord: "C" }]);
+                setChordDiagrams([]);
+                setDocxFile(null);
+            }
+        } catch (error) {
+            console.error("Error submitting chord data:", error);
+            alert("An error occurred while adding the chord.");
+        }
     };
-
-
 
     const toggleSection = () => {
         setIsOpen(!isOpen);

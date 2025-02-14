@@ -51,10 +51,10 @@ const AdminSidebar = () => {
                 <div className="absolute bottom-12 left-7">
                     <button
                         onClick={handleLogout}
-                        className="flex items-center text-red-600 hover:text-red-800"
+                        className="flex items-center text-red-600 hover:text-red-800 font-medium p-3 w-full rounded-md transition duration-200 ease-in-out hover:bg-red-100"
                     >
                         <span className="material-icons-outlined">logout</span>
-                        <span className="ml-2">Logout</span>
+                        <span className="ml-3">Logout</span>
                     </button>
                 </div>
             </aside>

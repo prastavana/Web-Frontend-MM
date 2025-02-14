@@ -5,12 +5,6 @@ const AdminDashboard = () => {
     return (
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
             <AdminSidebar/>
-                <div className="absolute bottom-12 left-7">
-                    <button className="flex items-center text-red-600 hover:text-red-800">
-                        <span className="material-icons-outlined">logout</span>
-                        <span className="ml-2">Logout</span>
-                    </button>
-                </div>
 
 
             {/* Main Content */}

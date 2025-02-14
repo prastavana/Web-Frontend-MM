@@ -1,54 +1,90 @@
+import { useEffect, useState } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import {  Suspense } from "react";
+import { Suspense } from "react";
 import LoginPage from "./core/public/loginpage.jsx";
 import RegisterPage from "./core/public/register.jsx";
-import Gettingstarted from "./core/public/gettingstarted.jsx";
 import Dashboard from "./core/public/dashboard.jsx";
-import AdminDashboard from "./core/private/adminDashboard.jsx";
 import ForgetPassword from "./core/public/forgetPassword.jsx";
-import ResetPassword from "./core/public/resetPassword.jsx";
-import FirstPage from "./core/public/firstPage.jsx";
-import AddChord from "./core/private/addChord.jsx";
-import AddLesson from "./core/private/addLesson.jsx";
-import AddPracticeSession from "./core/private/addPracticeSessions.jsx";
+import ResetPasswordPage from "./core/public/resetPassword.jsx";
 import Lesson from "./core/public/lesson.jsx";
 import PracticeSession from "./core/public/practiceSessions.jsx";
 import ChordAndLyricPage from "./core/public/chordAndLyric.jsx";
-
-
-
+import ProtectedRoute from "./components/protectedRoute.jsx";
+import AdminDashboard from "./core/private/adminDashboard.jsx";
+import AddChord from "./core/private/addChord.jsx";
+import AddPracticeSession from "./core/private/addPracticeSessions.jsx";
+import AddLesson from "./core/private/addLesson.jsx";
+import Gettingstarted from "./core/public/gettingstarted.jsx";
 
 function App() {
-  // Placeholder for authentication state; replace with actual logic
-  const isAuthenticated = false; // Replace with your auth logic
-  const isAdmin = false; // Replace with actual admin detection logic
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  // Public Routes
+  useEffect(() => {
+    // Check localStorage for token and role
+    const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
+    if (token) {
+      setIsAuthenticated(true);
+      setIsAdmin(role === "admin"); // Ensure that role is set as 'admin' for admin routes
+    } else {
+      setIsAuthenticated(false);
+      setIsAdmin(false);
+    }
+  }, []);
+
+  // Public Routes (Always accessible)
   const publicRoutes = [
     { path: "/", element: <Gettingstarted /> },
-    { path: "/firstpage", element: <FirstPage /> },
-    { path: "/login", element: <LoginPage /> },
+    { path: "/login", element: <LoginPage setIsAuthenticated={setIsAuthenticated} setIsAdmin={setIsAdmin} /> },
     { path: "/register", element: <RegisterPage /> },
     { path: "/dashboard", element: <Dashboard /> },
     { path: "/forgetPassword", element: <ForgetPassword /> },
-    { path: "/resetPassword", element: <ResetPassword /> },
+    { path: "/resetPassword", element: <ResetPasswordPage /> },
     { path: "/lesson", element: <Lesson /> },
-    { path: "/practiceSession", element: <PracticeSession /> },
+    { path: "/practiceSessions", element: <PracticeSession /> },
     { path: "/chords", element: <ChordAndLyricPage /> },
     { path: "*", element: <>Page not found</> },
   ];
 
-  // Private/Admin Routes
+  // Private/Admin Routes (Require authentication and admin role)
   const privateRoutes = [
-    { path: "/admindash", element: <AdminDashboard /> },
-    { path: "/addChord", element: <AddChord /> },
-    { path: "/addLesson", element: <AddLesson /> },
-    { path: "/addPracticeSession", element: <AddPracticeSession /> },
-    { path: "*", element: <>Unauthorized</> },
+    {
+      path: "/admindash",
+      element: (
+          <ProtectedRoute isAdminRoute={true} isAuthenticated={isAuthenticated} isAdmin={isAdmin}>
+            <AdminDashboard />
+          </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/addChord",
+      element: (
+          <ProtectedRoute isAdminRoute={true} isAuthenticated={isAuthenticated} isAdmin={isAdmin}>
+            <AddChord />
+          </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/addPracticeSessions",
+      element: (
+          <ProtectedRoute isAdminRoute={true} isAuthenticated={isAuthenticated} isAdmin={isAdmin}>
+            <AddPracticeSession />
+          </ProtectedRoute>
+      ),
+    },
+    {
+      path: "/addLesson",
+      element: (
+          <ProtectedRoute isAdminRoute={true} isAuthenticated={isAuthenticated} isAdmin={isAdmin}>
+            <AddLesson />
+          </ProtectedRoute>
+      ),
+    },
   ];
 
-  // Route selection based on authentication and role
-  const routes = isAuthenticated ? (isAdmin ? privateRoutes : publicRoutes) : publicRoutes;
+  // Combine all routes
+  const routes = [...publicRoutes, ...privateRoutes];
 
   // Router
   const router = createBrowserRouter(routes);
