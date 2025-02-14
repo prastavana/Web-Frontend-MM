@@ -4,48 +4,42 @@ import Sidebar from "../../components/sidebar.jsx"; // Ensure Sidebar component 
 export default function ChordAndLyricPage() {
     const [songs, setSongs] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("Pop");
-    const [textSize, setTextSize] = useState(16); // Initial text size for song content
+    const [textSize, setTextSize] = useState(16);
     const [isAutoscrolling, setIsAutoscrolling] = useState(false);
     const [scrollSpeed, setScrollSpeed] = useState(1);
-    const lyricsRef = useRef(null); // Reference for autoscroll functionality
+    const lyricsRef = useRef(null);
 
     useEffect(() => {
-        // Simulate fetching songs data from an API or local storage
         const fetchSongs = async () => {
             try {
-                const response = await fetch("/api/songs"); // Replace with your API endpoint
+                const response = await fetch("/api/songs");
                 const data = await response.json();
                 setSongs(data);
             } catch (error) {
                 console.error("Error fetching songs:", error);
             }
         };
-
         fetchSongs();
     }, []);
 
-    // Filter songs based on selected category
     const filteredSongs = songs.filter((song) => song.category === selectedCategory);
 
-    // Handle autoscroll effect
     useEffect(() => {
         if (isAutoscrolling && lyricsRef.current) {
             const scrollInterval = setInterval(() => {
-                lyricsRef.current.scrollBy(0, scrollSpeed); // Scroll by scrollSpeed amount
+                lyricsRef.current.scrollBy(0, scrollSpeed);
             }, 100);
 
-            return () => clearInterval(scrollInterval); // Cleanup on component unmount or when autoscrolling stops
+            return () => clearInterval(scrollInterval);
         }
     }, [isAutoscrolling, scrollSpeed]);
 
     return (
         <div className="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen flex items-start justify-center">
             <Sidebar />
-            <main className="flex-1 p-6 flex justify-center items-start mt-4">
-                <div className="p-6 bg-white rounded-lg shadow-md w-[95%] mt-8 min-h-[550px] ml-32"> {/* Increased width */}
+            <main className="flex-1 p-6 flex justify-center items-start mt-0"> {/* Adjusted margin-top */}
+                <div className="p-6 bg-white rounded-lg shadow-md w-[95%] mt-4 min-h-[550px] ml-32"> {/* Reduced margin-top */}
                     <h2 className="text-2xl font-bold mb-4">Available {selectedCategory} Songs</h2>
-
-                    {/* Category Text Links below the title, aligned to the left */}
                     <div className="flex justify-start space-x-8 mb-6">
                         {["Ukulele", "Guitar", "Piano"].map((category) => (
                             <span
@@ -62,7 +56,6 @@ export default function ChordAndLyricPage() {
                         ))}
                     </div>
 
-                    {/* Songs List */}
                     <div className="space-y-4">
                         {filteredSongs.length === 0 ? (
                             <p className="text-center text-gray-500">No songs available in this category.</p>
@@ -78,13 +71,10 @@ export default function ChordAndLyricPage() {
                                         <span className="text-sm font-medium">Category:</span>
                                         <span className="text-sm text-gray-500"> {song.category}</span>
                                     </div>
-
                                     <div className="mt-2">
                                         <span className="text-sm font-medium">Chords:</span>
                                         <p className="text-sm text-gray-500">{song.chords.slice(0, 50)}...</p>
                                     </div>
-
-                                    {/* View button */}
                                     <a
                                         href={`/song/${song.id}`}
                                         className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
@@ -96,8 +86,8 @@ export default function ChordAndLyricPage() {
                         )}
                     </div>
 
-                    {/* Additional Controls for Text Size and Autoscroll */}
-                    <div className="p-4 bg-white rounded-lg shadow-md mt-8 flex flex-col space-y-4"> {/* Increased margin-top */}
+                    {/* Controls for Text Size and Autoscroll */}
+                    <div className="p-2 bg-white rounded-lg shadow-md mt-24 flex items-center justify-between space-x-6"> {/* Reduced padding */}
                         {/* Text Size Controls */}
                         <div className="flex items-center space-x-2">
                             <button
@@ -116,27 +106,25 @@ export default function ChordAndLyricPage() {
                         </div>
 
                         {/* Autoscroll Controls */}
-                        <div className="flex items-center space-x-4">
-                            <button
-                                onClick={() => setIsAutoscrolling(!isAutoscrolling)}
-                                className={`px-4 py-2 rounded-md ${isAutoscrolling ? "bg-red-500 text-white" : "bg-green-500 text-white"}`}
-                            >
-                                {isAutoscrolling ? "Stop Autoscroll" : "Start Autoscroll"}
-                            </button>
+                        <button
+                            onClick={() => setIsAutoscrolling(!isAutoscrolling)}
+                            className={`px-4 py-2 rounded-md ${isAutoscrolling ? "bg-red-500 text-white" : "bg-green-500 text-white"}`}
+                        >
+                            {isAutoscrolling ? "Stop Autoscroll" : "Start Autoscroll"}
+                        </button>
 
-                            {/* Scroll Speed Dial */}
-                            <div className="flex items-center space-x-2">
-                                <p className="text-sm text-gray-700">Scroll Speed:</p>
-                                <input
-                                    type="range"
-                                    min="1"
-                                    max="10"
-                                    value={scrollSpeed}
-                                    onChange={(e) => setScrollSpeed(Number(e.target.value))}
-                                    className="w-24"
-                                />
-                                <span>{scrollSpeed}</span>
-                            </div>
+                        {/* Scroll Speed Dial */}
+                        <div className="flex items-center space-x-2">
+                            <p className="text-sm text-gray-700">Scroll Speed:</p>
+                            <input
+                                type="range"
+                                min="1"
+                                max="10"
+                                value={scrollSpeed}
+                                onChange={(e) => setScrollSpeed(Number(e.target.value))}
+                                className="w-24"
+                            />
+                            <span>{scrollSpeed}</span>
                         </div>
                     </div>
                 </div>
@@ -144,7 +132,7 @@ export default function ChordAndLyricPage() {
                 {/* Right Sidebar with Profile Icon */}
                 <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
                     <img
-                        src="src/assets/images/nezuko.jpg" // Adjust the path to your image
+                        src="src/assets/images/nezuko.jpg"
                         alt="Profile"
                         className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
                     />
