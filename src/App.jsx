@@ -15,6 +15,7 @@ import AddChord from "./core/private/addChord.jsx";
 import AddPracticeSession from "./core/private/addPracticeSessions.jsx";
 import AddLesson from "./core/private/addLesson.jsx";
 import Gettingstarted from "./core/public/gettingstarted.jsx";
+import SongDetails from "./core/public/songDetails.jsx";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -44,6 +45,7 @@ function App() {
     { path: "/lesson", element: <Lesson /> },
     { path: "/practiceSessions", element: <PracticeSession /> },
     { path: "/chords", element: <ChordAndLyricPage /> },
+    { path: "/songDetails", element: <SongDetails /> },
     { path: "*", element: <>Page not found</> },
   ];
 
