@@ -54,28 +54,19 @@ const SongDetails = () => {
                 <h3 style={{ fontSize: '1.3em', marginBottom: '10px' }}>Chords:</h3>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
                     {song.chordDiagrams && song.chordDiagrams.length > 0 ? (
-                        song.chordDiagrams.map((diagram, index) => {
-                            // Ensure the image path is correct, remove the extra /uploads/ if needed
-                            const imagePath = diagram.startsWith('uploads/')
-                                ? `http://localhost:3000/${diagram}`
-                                : `http://localhost:3000/uploads/${diagram}`;
+                        song.chordDiagrams.map((diagram, index) => (
+                            <div key={index} style={{ textAlign: 'center' }}>
+                                {/* Display the chords */}
+                                <pre>{Array.isArray(song.lyrics[index]?.chords) ? song.lyrics[index].chords.join(' ') : ''}</pre>
 
-                            return (
-                                <div key={index} style={{ textAlign: 'center' }}>
-                                    {/* Display the chords */}
-                                    <pre>{Array.isArray(song.lyrics[index]?.chords) ? song.lyrics[index].chords.join(' ') : ''}</pre>
-
-                                    {/* Correct image path */}
-                                    <img
-                                        src={imagePath}
-                                        alt={`Chord Diagram ${index + 1}`}
-                                        style={{ width: '100px', height: 'auto' }}
-                                    />
-                                    {/* Log the image path for debugging */}
-                                    {console.log(imagePath)}
-                                </div>
-                            );
-                        })
+                                {/* Correct path to the image */}
+                                <img
+                                    src={`http://localhost:3000/uploads/${diagram}`} // Ensure the URL is correct
+                                    alt={`Chord Diagram ${index + 1}`}
+                                    style={{ width: '100px', height: 'auto' }}
+                                />
+                            </div>
+                        ))
                     ) : (
                         <p>No chord diagrams available.</p>
                     )}
@@ -94,6 +85,7 @@ const SongDetails = () => {
 
             {/* DOCX Parsed Content */}
             <div>
+                <h3 style={{ fontSize: '1.5em', marginTop: '30px' }}></h3>
                 {song.docxText && song.docxText.length > 0 ? (
                     renderFormattedLyrics(song.docxText)
                 ) : (
