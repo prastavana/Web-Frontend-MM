@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Route } from "react-router-dom";
 import { Suspense } from "react";
 import LoginPage from "./core/public/loginpage.jsx";
 import RegisterPage from "./core/public/register.jsx";
@@ -45,7 +45,7 @@ function App() {
     { path: "/lesson", element: <Lesson /> },
     { path: "/practiceSessions", element: <PracticeSession /> },
     { path: "/chords", element: <ChordAndLyricPage /> },
-    { path: "/songDetails", element: <SongDetails /> },
+    { path: "/song/:id", element: <SongDetails /> }, // Added dynamic route for SongDetails
     { path: "*", element: <>Page not found</> },
   ];
 

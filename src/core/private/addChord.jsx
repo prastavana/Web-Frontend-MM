@@ -102,7 +102,7 @@ const AddChord = () => {
         }
 
         try {
-            const response = await axios.post("http://localhost:3000/api/songs/songs", formData, {  // Updated URL to /api/songs/chords
+            const response = await axios.post("http://localhost:3000/api/songs/", formData, {  // Updated URL to /api/songs/chords
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
