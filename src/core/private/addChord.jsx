@@ -83,32 +83,27 @@ const AddChord = () => {
         const formData = new FormData();
         formData.append("songName", songName);
         formData.append("selectedInstrument", selectedInstrument);
-
-        // Append lyrics data
-        lyrics.forEach((line, index) => {
-            formData.append(`lyrics[${index}][section]`, line.section);
-            formData.append(`lyrics[${index}][lyric]`, line.lyric);
-            formData.append(`lyrics[${index}][chord]`, line.chord);
-        });
+        // Append the entire lyrics array as a JSON string:
+        formData.append("lyrics", JSON.stringify(lyrics));
 
         // Append chord diagrams
         chordDiagrams.forEach((file) => {
             formData.append("chordDiagrams", file);
         });
 
-        // Append DOCX file
+        // Append DOCX file if available
         if (docxFile) {
             formData.append("docxFile", docxFile);
         }
 
         try {
-            const response = await axios.post("http://localhost:3000/api/songs/", formData, {  // Updated URL to /api/songs/chords
+            const response = await axios.post("http://localhost:3000/api/songs/create", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data",
                 },
             });
 
-            if (response.status === 200) {
+            if (response.status === 200 || response.status === 201) {
                 alert("Chords Added Successfully!");
                 setSongName("");
                 setLyrics([{ section: "Verse 1", lyric: "This is a verse.", chord: "C" }]);
