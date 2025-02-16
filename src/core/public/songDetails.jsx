@@ -55,16 +55,18 @@ const SongDetails = () => {
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px' }}>
                     {song.chordDiagrams && song.chordDiagrams.length > 0 ? (
                         song.chordDiagrams.map((diagram, index) => (
-                            <div key={index} style={{ textAlign: 'center' }}>
+                            <div key={index} style={{textAlign: 'center'}}>
                                 {/* Display the chords */}
                                 <pre>{Array.isArray(song.lyrics[index]?.chords) ? song.lyrics[index].chords.join(' ') : ''}</pre>
 
                                 {/* Correct path to the image */}
                                 <img
-                                    src={`http://localhost:3000/uploads/${diagram}`} // Ensure the URL is correct
+                                    src={`http://localhost:3000/${diagram}`} // Remove extra "uploads/"
                                     alt={`Chord Diagram ${index + 1}`}
-                                    style={{ width: '100px', height: 'auto' }}
+                                    style={{width: '100px', height: 'auto'}}
                                 />
+
+
                             </div>
                         ))
                     ) : (
