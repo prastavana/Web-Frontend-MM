@@ -45,7 +45,7 @@ function App() {
     { path: "/lesson", element: <Lesson /> },
     { path: "/practiceSessions", element: <PracticeSession /> },
     { path: "/chords", element: <ChordAndLyricPage /> },
-    { path: "/song/:id", element: <SongDetails /> }, // Added dynamic route for SongDetails
+    { path: "/song/:songId", element: <SongDetails /> }, // Added dynamic route for SongDetails
     { path: "*", element: <>Page not found</> },
   ];
 
