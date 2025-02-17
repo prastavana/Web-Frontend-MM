@@ -1,17 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import Sidebar from "../../components/sidebar.jsx";
 
 const SongDetails = () => {
     const { songId } = useParams();
     const [song, setSong] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [fontSize, setFontSize] = useState(16);
+    const [autoScroll, setAutoScroll] = useState(false);
+    const [scrollSpeed, setScrollSpeed] = useState(5);
+    const lyricsRef = useRef(null);
 
     useEffect(() => {
         const fetchSong = async () => {
             try {
                 const response = await axios.get(`http://localhost:3000/api/songs/${songId}`);
-                console.log("Fetched Song Data:", response.data); // ✅ Debugging API response
+                console.log("Fetched Song Data:", response.data);
                 setSong(response.data);
             } catch (error) {
                 console.error("Error fetching song details:", error);
@@ -23,75 +28,116 @@ const SongDetails = () => {
         fetchSong();
     }, [songId]);
 
+    useEffect(() => {
+        let scrollInterval;
+        if (autoScroll && lyricsRef.current) {
+            scrollInterval = setInterval(() => {
+                lyricsRef.current.scrollTop += scrollSpeed;
+            }, 100);
+        }
+        return () => clearInterval(scrollInterval);
+    }, [autoScroll, scrollSpeed]);
+
     if (loading) return <div>Loading...</div>;
     if (!song) return <div>Song not found.</div>;
 
-    // ✅ Function to render lyrics safely
     const renderLyrics = (lyrics) => (
-        <pre style={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap' }}>
+        <pre
+            style={{
+                fontFamily: 'monospace',
+                whiteSpace: 'pre-wrap',
+                fontSize: `${fontSize}px`,
+                margin: 0,
+            }}
+        >
             {lyrics}
         </pre>
     );
 
     return (
-        <div style={{ padding: '20px' }}>
-            {/* ✅ Highlighted Song Title */}
-            <h1 style={{
-                fontSize: '1.8rem',
-                fontWeight: 'bold',
-                color: '#2c3e50',
-                textTransform: 'uppercase',
-                letterSpacing: '2px'
-            }}>
-                Song - {song.songName}
-            </h1>
+        <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
+            <Sidebar />
+            <div className="flex-1 flex flex-col justify-start items-start p-6">
+                {/* Main Container with fixed height and overflow hidden */}
+                <div className="bg-white p-8 rounded-2xl shadow-lg w-[87%] h-[640px] overflow-hidden">
+                    <h1 className="text-2xl font-bold text-gray-800 uppercase tracking-wider text-center">
+                        Song - {song.songName}
+                    </h1>
+                    <p className="text-lg text-gray-700 mt-4">
+                        <strong>Instrument:</strong> {song.selectedInstrument}
+                    </p>
 
-            {/* ✅ Instrument Display */}
-            <p style={{ marginBottom: '20px' }}>
-                <strong>Instrument:</strong> {song.selectedInstrument}
-            </p>
-
-            {/* ✅ Chord Diagrams */}
-            <h2 style={{ marginTop: '20px' }}>Chord Diagrams:</h2>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
-                {song.chordDiagrams && song.chordDiagrams.length > 0 ? (
-                    song.chordDiagrams.map((chord, index) => (
-                        <img
-                            key={index}
-                            src={`http://localhost:3000/${chord}`} // ✅ Ensure valid URL
-                            alt={`Chord Diagram ${index + 1}`}
-                            style={{ maxWidth: "100px", height: "auto", margin: "5px" }}
-                            onError={(e) => { e.target.style.display = "none"; }} // Hide broken images
-                        />
-                    ))
-                ) : (
-                    <p>No chord diagrams available.</p>
-                )}
-            </div>
-
-            {/* ✅ Lyrics Section */}
-            <h2 style={{ marginTop: '20px' }}>Lyrics:</h2>
-            {song.lyrics && song.lyrics.length > 0 ? (
-                song.lyrics.map((lyric, index) => (
-                    <div key={index} style={{ marginBottom: '20px' }}>
-                        <h3>{lyric.section}</h3>
-                        <div>
-                            {/* ✅ Check if parsedDocxFile is an array */}
-                            {Array.isArray(lyric.parsedDocxFile) && lyric.parsedDocxFile.length > 0 ? (
-                                lyric.parsedDocxFile.map((doc, docIndex) => (
-                                    <div key={docIndex}>
-                                        {renderLyrics(doc.lyrics)}
-                                    </div>
-                                ))
-                            ) : (
-                                <p>No lyrics available.</p>
-                            )}
-                        </div>
+                    <h2 className="text-xl font-semibold mt-4">Chord Diagrams:</h2>
+                    <div className="flex flex-wrap gap-4 mt-2">
+                        {song.chordDiagrams && song.chordDiagrams.length > 0 ? (
+                            song.chordDiagrams.map((chord, index) => (
+                                <img
+                                    key={index}
+                                    src={`http://localhost:3000/${chord}`}
+                                    alt={`Chord Diagram ${index + 1}`}
+                                    className="w-24 h-auto rounded shadow-md"
+                                    onError={(e) => { e.target.style.display = "none"; }}
+                                />
+                            ))
+                        ) : (
+                            <p className="text-gray-600">No chord diagrams available.</p>
+                        )}
                     </div>
-                ))
-            ) : (
-                <p>No lyrics available.</p>
-            )}
+
+                    <h2 className="text-xl font-semibold mt-4">Lyrics:</h2>
+                    {/* Lyrics container now has a fixed height */}
+                    <div className="h-[400px] overflow-y-auto" ref={lyricsRef}>
+                        {song.lyrics && song.lyrics.length > 0 ? (
+                            song.lyrics.map((lyric, index) => (
+                                <div key={index} className="mt-2">
+                                    <h3 className="text-lg font-semibold text-gray-800">{lyric.section}</h3>
+                                    <div>
+                                        {Array.isArray(lyric.parsedDocxFile) && lyric.parsedDocxFile.length > 0 ? (
+                                            lyric.parsedDocxFile.map((doc, docIndex) => (
+                                                <div key={docIndex} className="mt-1 bg-gray-100 p-4 rounded-lg">
+                                                    {renderLyrics(doc.lyrics)}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-gray-600">No lyrics available.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <p className="text-gray-600">No lyrics available.</p>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex justify-between items-center mt-6 bg-white p-1 rounded-lg shadow-md ml-56 w-[50%]">
+                    <div className="flex items-center space-x-4 flex-1 justify-center">
+                        <button onClick={() => setFontSize(fontSize + 1)} className="bg-gray-200 px-3 py-2 rounded-md">+1</button>
+                        <span className="text-gray-700">{fontSize}px</span>
+                        <button onClick={() => setFontSize(fontSize - 1)} className="bg-gray-200 px-3 py-2 rounded-md">-1</button>
+                    </div>
+                    <div className="flex-1 flex justify-center">
+                        <button
+                            onClick={() => setAutoScroll(!autoScroll)}
+                            className="px-4 py-2 rounded-md text-white"
+                            style={{ backgroundColor: autoScroll ? "#ff5050" : "#87CEFA" }}
+                        >
+                            {autoScroll ? "Stop Scroll" : "Auto Scroll"}
+                        </button>
+                    </div>
+                    <div className="flex items-center space-x-3 flex-1 justify-center">
+                        <span className="text-gray-700">Speed:</span>
+                        <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            value={scrollSpeed}
+                            onChange={(e) => setScrollSpeed(Number(e.target.value))}
+                            className="cursor-pointer"
+                        />
+                    </div>
+                </div>
+            </div>
         </div>
     );
 };
