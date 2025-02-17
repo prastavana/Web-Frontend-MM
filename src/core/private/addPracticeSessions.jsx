@@ -12,20 +12,74 @@ export default function AddPracticeSession() {
         file: null,
     });
 
+    const [loading, setLoading] = useState(false); // State to handle form submission loading
+    const [error, setError] = useState(""); // Error message state
+    const [success, setSuccess] = useState(""); // Success message state
+
+    // Allowed file types for upload
+    const allowedFileTypes = ["image/png", "video/mp4", "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+    const maxFileSize = 10 * 1024 * 1024; // 10 MB file size limit
+
+    // Handle form field changes
     const handleChange = (e) => {
         const { name, value } = e.target;
         setSession({ ...session, [name]: value });
     };
 
+    // Handle file upload
     const handleFileChange = (e) => {
-        setSession({ ...session, file: e.target.files[0] });
+        const file = e.target.files[0];
+        if (file) {
+            // Validate file type and size
+            if (!allowedFileTypes.includes(file.type)) {
+                setError("Invalid file type. Only .png, .mp4, .pdf, .docx are allowed.");
+                return;
+            }
+            if (file.size > maxFileSize) {
+                setError("File size exceeds the 10 MB limit.");
+                return;
+            }
+            setSession({ ...session, file: file });
+            setError(""); // Clear any previous error
+        }
     };
 
-    const handleSubmit = (e) => {
+    // Form submission handler
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Practice Session Data:", session);
-        alert(`Practice session for ${session.instrument} - ${session.day} added successfully!`);
-        // Here you can add API call to save session in the database
+        // Basic form validation
+        if (!session.title || !session.description || !session.duration || !session.instructions) {
+            setError("Please fill in all required fields.");
+            return;
+        }
+        if (session.duration <= 0) {
+            setError("Duration must be greater than 0.");
+            return;
+        }
+
+        setLoading(true);
+        setError(""); // Clear previous error messages
+        try {
+            // Simulating form submission
+            console.log("Practice Session Data:", session);
+
+            // Here you would make an API call to save the session in the database
+
+            setSuccess(`Practice session for ${session.instrument} - ${session.day} added successfully!`);
+            setSession({ // Reset the form after success
+                instrument: "Guitar",
+                day: "Day 1",
+                title: "",
+                description: "",
+                duration: "",
+                instructions: "",
+                file: null,
+            });
+        } catch (err) {
+            setError("An error occurred. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -109,7 +163,7 @@ export default function AddPracticeSession() {
                                     value={session.duration}
                                     onChange={handleChange}
                                     className="w-full p-2 border rounded-md"
-                                    min="5"
+                                    min="1"
                                     required
                                 />
                             </div>
@@ -131,15 +185,25 @@ export default function AddPracticeSession() {
                             {/* File Upload (For Backing Tracks, PDFs, etc.) */}
                             <div>
                                 <label className="block font-medium">Upload File (Optional)</label>
-                                <input type="file" onChange={handleFileChange} className="w-full p-2 border rounded-md" />
+                                <input
+                                    type="file"
+                                    onChange={handleFileChange}
+                                    className="w-full p-2 border rounded-md"
+                                    accept="image/png, video/mp4, application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                />
                             </div>
+
+                            {/* Error or Success Message */}
+                            {error && <p className="text-red-500">{error}</p>}
+                            {success && <p className="text-green-500">{success}</p>}
 
                             {/* Submit Button */}
                             <button
                                 type="submit"
                                 className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full"
+                                disabled={loading}
                             >
-                                Add Practice Session
+                                {loading ? "Submitting..." : "Add Practice Session"}
                             </button>
                         </form>
                     </div>

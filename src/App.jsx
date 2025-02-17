@@ -71,7 +71,7 @@ function App() {
       path: "/addPracticeSessions",
       element: (
           <ProtectedRoute isAdminRoute={true} isAuthenticated={isAuthenticated} isAdmin={isAdmin}>
-            <AddPracticeSession />
+            <AddPracticeSession/>
           </ProtectedRoute>
       ),
     },

@@ -39,7 +39,7 @@ const AdminSidebar = () => {
                         </li>
                         <li>
                             <Link
-                                to="/addPracticeSession"
+                                to="/addPracticeSessions"
                                 className="flex items-center p-4 text-gray-700 hover:bg-blue-100"
                             >
                                 <span className="material-icons-outlined">playlist_add_check</span>
