@@ -42,14 +42,7 @@ const SongDetails = () => {
     if (!song) return <div>Song not found.</div>;
 
     const renderLyrics = (lyrics) => (
-        <pre
-            style={{
-                fontFamily: 'monospace',
-                whiteSpace: 'pre-wrap',
-                fontSize: `${fontSize}px`,
-                margin: 0,
-            }}
-        >
+        <pre style={{ fontFamily: 'monospace', whiteSpace: 'pre-wrap', fontSize: `${fontSize}px` }}>
             {lyrics}
         </pre>
     );
@@ -58,14 +51,11 @@ const SongDetails = () => {
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
             <Sidebar />
             <div className="flex-1 flex flex-col justify-start items-start p-6">
-                {/* Main Container with fixed height and overflow hidden */}
-                <div className="bg-white p-8 rounded-2xl shadow-lg w-[87%] h-[640px] overflow-hidden">
+                <div className="bg-white p-8 rounded-2xl shadow-lg w-[87%] h-[640px] overflow-y-auto" ref={lyricsRef}>
                     <h1 className="text-2xl font-bold text-gray-800 uppercase tracking-wider text-center">
                         Song - {song.songName}
                     </h1>
-                    <p className="text-lg text-gray-700 mt-4">
-                        <strong>Instrument:</strong> {song.selectedInstrument}
-                    </p>
+                    <p className="text-lg text-gray-700 mt-4"><strong>Instrument:</strong> {song.selectedInstrument}</p>
 
                     <h2 className="text-xl font-semibold mt-4">Chord Diagrams:</h2>
                     <div className="flex flex-wrap gap-4 mt-2">
@@ -85,8 +75,7 @@ const SongDetails = () => {
                     </div>
 
                     <h2 className="text-xl font-semibold mt-4">Lyrics:</h2>
-                    {/* Lyrics container now has a fixed height */}
-                    <div className="h-[400px] overflow-y-auto" ref={lyricsRef}>
+                    <div className="max-h-[400px] overflow-y-auto">
                         {song.lyrics && song.lyrics.length > 0 ? (
                             song.lyrics.map((lyric, index) => (
                                 <div key={index} className="mt-2">
