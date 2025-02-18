@@ -7,7 +7,7 @@ const tuningFrequencies = {
     ukulele: { G4: 392.00, C4: 261.63, E4: 329.63, A4: 440.00 },
 };
 
-const Tuner = () => {
+const TunerInst = () => {
     const [instrument, setInstrument] = useState("guitar");
     const [currentNote, setCurrentNote] = useState(null);
     const [deviation, setDeviation] = useState(0);
@@ -177,5 +177,5 @@ const Tuner = () => {
     );
 };
 
-export default Tuner;
+export default TunerInst;
 
