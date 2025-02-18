@@ -2,12 +2,16 @@ import React from "react";
 
 // eslint-disable-next-line react/prop-types
 const Note = ({ name, octave }) => {
+    // eslint-disable-next-line react/prop-types
+    const noteParts = name.match(/^([A-G#]+)(\d+)$/);
+    const noteName = noteParts ? noteParts[1] : name;
+    const noteOctave = noteParts ? noteParts[2] : octave;
+
     return (
         <div style={styles.note}>
-            <span style={styles.name}>{name[0]}</span>
-            {/* eslint-disable-next-line react/prop-types */}
-            {name.length > 1 && <span style={styles.sharp}>{name[1]}</span>}
-            <span style={styles.octave}>{octave}</span>
+            <span style={styles.name}>{noteName[0]}</span>
+            {noteName.length > 1 && <span style={styles.sharp}>{noteName.slice(1)}</span>}
+            <span style={styles.octave}>{noteOctave}</span>
         </div>
     );
 };

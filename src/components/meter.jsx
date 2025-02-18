@@ -1,6 +1,5 @@
 import React from "react";
 
-// eslint-disable-next-line react/prop-types
 const Meter = ({ cents }) => {
     const rotation = Math.max(-50, Math.min(50, cents));
 

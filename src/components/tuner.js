@@ -1,10 +1,11 @@
 import PitchFinder from "pitchfinder";
 
 export default class Tuner {
-    constructor(sampleRate = 22050, bufferSize = 2048) {
+    constructor(sampleRate = 44100, bufferSize = 8192) {
         this.sampleRate = sampleRate;
         this.bufferSize = bufferSize;
         this.pitchFinder = new PitchFinder.YIN({ sampleRate: this.sampleRate });
+        this.lastFrequency = null;
     }
 
     start(onNoteDetected) {
@@ -20,7 +21,8 @@ export default class Tuner {
                 const detectPitch = () => {
                     this.analyser.getFloatTimeDomainData(this.dataArray);
                     const frequency = this.pitchFinder(this.dataArray);
-                    if (frequency) {
+
+                    if (frequency && this.isStableFrequency(frequency)) {
                         const note = this.getNoteData(frequency);
                         onNoteDetected(note);
                     }
@@ -29,6 +31,17 @@ export default class Tuner {
                 detectPitch();
             })
             .catch((err) => console.error("Microphone access denied:", err));
+    }
+
+    isStableFrequency(frequency) {
+        if (!this.lastFrequency) {
+            this.lastFrequency = frequency;
+            return true;
+        }
+        const stabilityThreshold = 0.5; // More precise, smaller threshold
+        const stable = Math.abs(this.lastFrequency - frequency) < stabilityThreshold;
+        this.lastFrequency = frequency;
+        return stable;
     }
 
     getNoteData(frequency) {
@@ -45,6 +58,6 @@ export default class Tuner {
 
     getCents(frequency, noteIndex) {
         const standardFreq = 440 * Math.pow(2, (noteIndex - 69) / 12);
-        return Math.floor((1200 * Math.log2(frequency / standardFreq)));
+        return Math.floor(1200 * Math.log2(frequency / standardFreq));
     }
 }
