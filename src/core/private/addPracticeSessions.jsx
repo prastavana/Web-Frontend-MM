@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import AdminSidebar from "../../components/adminSidebar.jsx";
+import axios from "axios"; // Import axios
 
 export default function AddPracticeSession() {
     const [session, setSession] = useState({
@@ -9,39 +10,17 @@ export default function AddPracticeSession() {
         description: "",
         duration: "",
         instructions: "",
-        file: null,
+        mediaUrl: "", // Renamed to mediaUrl for image/video URL
     });
 
     const [loading, setLoading] = useState(false); // State to handle form submission loading
     const [error, setError] = useState(""); // Error message state
     const [success, setSuccess] = useState(""); // Success message state
 
-    // Allowed file types for upload
-    const allowedFileTypes = ["image/png", "video/mp4", "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
-    const maxFileSize = 10 * 1024 * 1024; // 10 MB file size limit
-
     // Handle form field changes
     const handleChange = (e) => {
         const { name, value } = e.target;
         setSession({ ...session, [name]: value });
-    };
-
-    // Handle file upload
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            // Validate file type and size
-            if (!allowedFileTypes.includes(file.type)) {
-                setError("Invalid file type. Only .png, .mp4, .pdf, .docx are allowed.");
-                return;
-            }
-            if (file.size > maxFileSize) {
-                setError("File size exceeds the 10 MB limit.");
-                return;
-            }
-            setSession({ ...session, file: file });
-            setError(""); // Clear any previous error
-        }
     };
 
     // Form submission handler
@@ -59,24 +38,40 @@ export default function AddPracticeSession() {
 
         setLoading(true);
         setError(""); // Clear previous error messages
+
+        const formData = {
+            instrument: session.instrument,
+            day: session.day,
+            title: session.title,
+            description: session.description,
+            duration: session.duration,
+            instructions: session.instructions,
+            mediaUrl: session.mediaUrl, // Added mediaUrl to form data
+        };
+
         try {
-            // Simulating form submission
-            console.log("Practice Session Data:", session);
+            // Send data as JSON via POST request
+            const response = await axios.post("http://localhost:3000/api/sessions/", formData);
 
-            // Here you would make an API call to save the session in the database
+            // Log the response to the console
+            console.log('Response from server:', response);
 
-            setSuccess(`Practice session for ${session.instrument} - ${session.day} added successfully!`);
-            setSession({ // Reset the form after success
-                instrument: "Guitar",
-                day: "Day 1",
-                title: "",
-                description: "",
-                duration: "",
-                instructions: "",
-                file: null,
-            });
+            // If the response is successful
+            if (response.status === 200) {
+                setSuccess(`Practice session for ${session.instrument} - ${session.day} added successfully!`);
+                setSession({ // Reset the form after success
+                    instrument: "Guitar",
+                    day: "Day 1",
+                    title: "",
+                    description: "",
+                    duration: "",
+                    instructions: "",
+                    mediaUrl: "", // Reset mediaUrl
+                });
+            }
         } catch (err) {
             setError("An error occurred. Please try again.");
+            console.error("Error occurred during submission:", err); // Log error to console
         } finally {
             setLoading(false);
         }
@@ -182,20 +177,53 @@ export default function AddPracticeSession() {
                                 ></textarea>
                             </div>
 
-                            {/* File Upload (For Backing Tracks, PDFs, etc.) */}
+                            {/* Media URL (Image/Video URL) */}
                             <div>
-                                <label className="block font-medium">Upload File (Optional)</label>
+                                <label className="block font-medium">Enter Image/Video URL</label>
                                 <input
-                                    type="file"
-                                    onChange={handleFileChange}
+                                    type="url"
+                                    name="mediaUrl"
+                                    value={session.mediaUrl}
+                                    onChange={handleChange}
                                     className="w-full p-2 border rounded-md"
-                                    accept="image/png, video/mp4, application/pdf, application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                                    placeholder="Paste image or video URL here"
                                 />
                             </div>
 
                             {/* Error or Success Message */}
                             {error && <p className="text-red-500">{error}</p>}
-                            {success && <p className="text-green-500">{success}</p>}
+                            {success && (
+                                <div className="text-green-500">
+                                    <p>{success}</p>
+                                    {/* Conditionally render the mediaUrl if it's available */}
+                                    {session.mediaUrl && session.mediaUrl !== "" ? (
+                                        <div>
+                                            <p>Media URL: {session.mediaUrl}</p>
+                                            {/* If the URL is an image/video, display it as well */}
+                                            {session.mediaUrl.includes("http") && (
+                                                <div>
+                                                    <h3>Preview:</h3>
+                                                    {session.mediaUrl.includes("youtube.com") || session.mediaUrl.includes("youtu.be") ? (
+                                                        // If the media is a video, embed it
+                                                        <iframe
+                                                            src={session.mediaUrl}
+                                                            frameBorder="0"
+                                                            width="500"
+                                                            height="300"
+                                                            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                                            allowFullScreen
+                                                            title="Video Preview"
+                                                        ></iframe>
+                                                    ) : (
+                                                        // If it's an image, display the image
+                                                        <img src={session.mediaUrl} alt="Practice Session Media" width="300" />
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : null}
+                                </div>
+                            )}
 
                             {/* Submit Button */}
                             <button

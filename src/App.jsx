@@ -16,6 +16,7 @@ import AddPracticeSession from "./core/private/addPracticeSessions.jsx";
 import AddLesson from "./core/private/addLesson.jsx";
 import Gettingstarted from "./core/public/gettingstarted.jsx";
 import SongDetails from "./core/public/songDetails.jsx";
+import Tuner from "./core/public/tuner.jsx";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -46,6 +47,8 @@ function App() {
     { path: "/practiceSessions", element: <PracticeSession /> },
     { path: "/chords", element: <ChordAndLyricPage /> },
     { path: "/song/:songId", element: <SongDetails /> }, // Added dynamic route for SongDetails
+    { path: "/tuner", element: <Tuner /> },
+
     { path: "*", element: <>Page not found</> },
   ];
 
