@@ -62,7 +62,7 @@ export default function Profile() {
         }
 
         try {
-            const response = await fetch("http://localhost:3000/api/auth/update-password", { // Updated endpoint
+            const response = await fetch("http://localhost:3000/api/auth/update-password", {
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -82,6 +82,11 @@ export default function Profile() {
 
             const data = await response.json();
             setSuccess(data.message || "Profile updated successfully!");
+
+            // Redirect to login page after successful password update
+            navigate("/login");
+
+            // Reset password fields
             setNewPassword('');
             setConfirmPassword('');
         } catch (err) {
