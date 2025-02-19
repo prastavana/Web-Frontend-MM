@@ -4,12 +4,12 @@ import Sidebar from "../../components/sidebar.jsx";
 
 export default function Profile() {
     const navigate = useNavigate();
-    const [user, setUser] = useState({ name: "", email: "", password: "" });
+    const [user, setUser] = useState({ name: "", email: "" });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -55,58 +55,37 @@ export default function Profile() {
             return;
         }
 
+        // Check if new passwords match
+        if (newPassword && newPassword !== confirmPassword) {
+            setError("New passwords do not match!");
+            return;
+        }
+
         try {
-            const response = await fetch("http://localhost:3000/api/auth/profile", {
+            const response = await fetch("http://localhost:3000/api/auth/update-password", { // Updated endpoint
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(user),
+                body: JSON.stringify({
+                    name: user.name,
+                    email: user.email,
+                    newPassword: newPassword || undefined, // Only send new password if it's provided
+                }),
             });
 
             if (!response.ok) {
-                throw new Error("Failed to update profile");
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to update profile");
             }
 
             const data = await response.json();
             setSuccess(data.message || "Profile updated successfully!");
-        } catch (err) {
-            setError("Error updating profile");
-        }
-    };
-
-    const handlePasswordUpdate = async (e) => {
-        e.preventDefault();
-        setError('');
-        setSuccess('');
-
-        const token = localStorage.getItem('token');
-        if (!token) {
-            navigate('/login');
-            return;
-        }
-
-        try {
-            const response = await fetch('http://localhost:3000/api/auth/update-password', {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ currentPassword, newPassword }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to update password');
-            }
-
-            const data = await response.json();
-            setSuccess(data.message || 'Password updated successfully!');
-            setCurrentPassword('');
             setNewPassword('');
+            setConfirmPassword('');
         } catch (err) {
-            setError('Error updating password');
+            setError(err.message || "Error updating profile");
         }
     };
 
@@ -148,12 +127,22 @@ export default function Profile() {
                                 </div>
 
                                 <div>
-                                    <label className="text-gray-700 font-semibold">Hashed Password</label>
+                                    <label className="text-gray-700 font-semibold">New Password</label>
                                     <input
-                                        type="text"
+                                        type="password"
                                         className="w-full p-2 rounded-lg bg-gray-200 bg-opacity-70"
-                                        value={user.password} // Assuming `password` contains the hashed password
-                                        readOnly
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-gray-700 font-semibold">Confirm New Password</label>
+                                    <input
+                                        type="password"
+                                        className="w-full p-2 rounded-lg bg-gray-200 bg-opacity-70"
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
                                     />
                                 </div>
 
@@ -165,35 +154,6 @@ export default function Profile() {
                             {success && <p className="mt-4 text-green-500">{success}</p>}
                         </>
                     )}
-
-                    <h3 className="mt-6 text-lg font-semibold text-gray-800">Update Password</h3>
-                    <form onSubmit={handlePasswordUpdate} className="w-full flex flex-col gap-4 mt-4">
-                        <div>
-                            <label className="text-gray-700 font-semibold">Current Password</label>
-                            <input
-                                type="password"
-                                className="w-full p-2 rounded-lg bg-gray-200 bg-opacity-70"
-                                value={currentPassword}
-                                onChange={(e) => setCurrentPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="text-gray-700 font-semibold">New Password</label>
-                            <input
-                                type="password"
-                                className="w-full p-2 rounded-lg bg-gray-200 bg-opacity-70"
-                                value={newPassword}
-                                onChange={(e) => setNewPassword(e.target.value)}
-                                required
-                            />
-                        </div>
-
-                        <button type="submit" className="py-2 px-4 rounded text-white bg-blue-500 hover:bg-blue-700 shadow-md">
-                            Update Password
-                        </button>
-                    </form>
 
                     <button
                         onClick={() => navigate(-1)}
