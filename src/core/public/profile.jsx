@@ -11,19 +11,18 @@ export default function Profile() {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                navigate("/login");
-                return;
-            }
-
             try {
-                const response = await fetch("http://localhost:5000/api/users/profile", {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    navigate("/login");
+                    return;
+                }
+
+                const response = await fetch("http://localhost:3000/api/auth/profile", {
                     method: "GET",
                     headers: {
-                        "Authorization": `Bearer ${token}`,
                         "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
                     },
                 });
 
@@ -33,9 +32,9 @@ export default function Profile() {
 
                 const data = await response.json();
                 setUser(data);
-                setLoading(false);
-            } catch (err) {
-                setError("Error loading profile");
+            } catch (error) {
+                setError("Error fetching profile");
+            } finally {
                 setLoading(false);
             }
         };
@@ -55,7 +54,7 @@ export default function Profile() {
         }
 
         try {
-            const response = await fetch("http://localhost:5000/api/users/profile", {
+            const response = await fetch("http://localhost:3000/api/auth/profile", {
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -69,7 +68,7 @@ export default function Profile() {
             }
 
             const data = await response.json();
-            setSuccess(data.message);
+            setSuccess(data.message || "Profile updated successfully!");
         } catch (err) {
             setError("Error updating profile");
         }
