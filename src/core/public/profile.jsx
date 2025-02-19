@@ -1,25 +1,129 @@
-import React from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../../components/sidebar.jsx";
 
 export default function Profile() {
-    const navigate = useNavigate(); // Initialize navigate function
+    const navigate = useNavigate();
+    const [user, setUser] = useState({ name: "", email: "" });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const token = localStorage.getItem("token");
+
+            if (!token) {
+                navigate("/login");
+                return;
+            }
+
+            try {
+                const response = await fetch("http://localhost:5000/api/users/profile", {
+                    method: "GET",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch profile");
+                }
+
+                const data = await response.json();
+                setUser(data);
+                setLoading(false);
+            } catch (err) {
+                setError("Error loading profile");
+                setLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, [navigate]);
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        setError("");
+        setSuccess("");
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:5000/api/users/profile", {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(user),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to update profile");
+            }
+
+            const data = await response.json();
+            setSuccess(data.message);
+        } catch (err) {
+            setError("Error updating profile");
+        }
+    };
 
     return (
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
-            {/* Sidebar */}
             <Sidebar />
 
-            {/* Main Content */}
             <main className="flex-1 p-6 flex justify-center items-center">
-                <div className="bg-white bg-opacity-60 backdrop-blur-lg rounded-3xl shadow-lg p-8 w-full max-w-3xl h-[70vh] flex flex-col items-center justify-center">
-                    <h2 className="text-2xl font-bold text-gray-800">Profile Page</h2>
-                    <p className="mt-2 text-gray-600">Welcome to your profile!</p>
+                <div className="bg-white bg-opacity-60 backdrop-blur-lg rounded-3xl shadow-lg p-8 w-full max-w-3xl h-[70vh] flex flex-col items-center">
+                    <h2 className="text-2xl font-bold text-gray-800">Profile</h2>
 
-                    {/* Back Button */}
+                    {loading ? (
+                        <p className="mt-4 text-gray-600">Loading...</p>
+                    ) : error ? (
+                        <p className="mt-4 text-red-500">{error}</p>
+                    ) : (
+                        <>
+                            <form onSubmit={handleUpdate} className="w-full flex flex-col gap-4 mt-4">
+                                <div>
+                                    <label className="text-gray-700 font-semibold">Name</label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-2 rounded-lg bg-gray-200 bg-opacity-70"
+                                        value={user.name}
+                                        onChange={(e) => setUser({ ...user, name: e.target.value })}
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-gray-700 font-semibold">Email</label>
+                                    <input
+                                        type="email"
+                                        className="w-full p-2 rounded-lg bg-gray-200 bg-opacity-70"
+                                        value={user.email}
+                                        onChange={(e) => setUser({ ...user, email: e.target.value })}
+                                        required
+                                    />
+                                </div>
+
+                                <button type="submit" className="py-2 px-4 rounded text-white bg-blue-500 hover:bg-blue-700 shadow-md">
+                                    Update Profile
+                                </button>
+                            </form>
+
+                            {success && <p className="mt-4 text-green-500">{success}</p>}
+                        </>
+                    )}
+
                     <button
-                        onClick={() => navigate(-1)} // Navigate back to the previous page
-                        className="mt-6 py-2 px-4 rounded text-white bg-blue-500 hover:bg-blue-700 shadow-md"
+                        onClick={() => navigate(-1)}
+                        className="mt-6 py-2 px-4 rounded text-white bg-gray-500 hover:bg-gray-700 shadow-md"
                     >
                         Go Back
                     </button>
