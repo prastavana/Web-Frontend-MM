@@ -17,6 +17,7 @@ import AddLesson from "./core/private/addLesson.jsx";
 import Gettingstarted from "./core/public/gettingstarted.jsx";
 import SongDetails from "./core/public/songDetails.jsx";
 import TunerInst from "./core/public/tunerInst.jsx";
+import Profile from "./core/public/profile.jsx";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -48,6 +49,7 @@ function App() {
     { path: "/chords", element: <ChordAndLyricPage /> },
     { path: "/song/:songId", element: <SongDetails /> }, // Added dynamic route for SongDetails
     { path: "/tuner", element: <TunerInst /> },
+    { path: "/profile", element: < Profile/> },
 
     { path: "*", element: <>Page not found</> },
   ];
@@ -83,7 +85,7 @@ function App() {
       element: (
           <ProtectedRoute isAdminRoute={true} isAuthenticated={isAuthenticated} isAdmin={isAdmin}>
             <AddLesson />
-          </ProtectedRoute>
+99          </ProtectedRoute>
       ),
     },
   ];

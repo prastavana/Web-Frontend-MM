@@ -1,11 +1,14 @@
 import React from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Sidebar from "../../components/sidebar.jsx";
 
 export default function Dashboard() {
+    const navigate = useNavigate(); // Initialize navigate function
+
     return (
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
             {/* Sidebar */}
-           <Sidebar/>
+            <Sidebar/>
 
             {/* Main Content */}
             <main className="flex-1 p-6 flex justify-center items-start mt-6">
@@ -39,9 +42,10 @@ export default function Dashboard() {
                             </button>
                         </div>
                     </div>
+
                     {/* Flex Container for the two boxes */}
                     <div className="mt-12 flex gap-8">
-                        {/* Play Along Song with Chords - Increased width */}
+                        {/* Play Along Song with Chords */}
                         <div className="relative h-48 w-1/2 rounded-xl overflow-hidden bg-gradient-to-r from-blue-400 to-blue-500 text-white shadow-lg">
                             <img
                                 src="src/assets/images/guitar2.jpg"
@@ -54,7 +58,7 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Tune Your Instruments - Increased width */}
+                        {/* Tune Your Instruments */}
                         <div className="relative h-48 w-1/2 rounded-xl overflow-hidden bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg">
                             <img
                                 src="src/assets/images/pick.jpg"
@@ -67,10 +71,6 @@ export default function Dashboard() {
                             </div>
                         </div>
                     </div>
-
-
-
-
                 </div>
             </main>
 
@@ -80,6 +80,7 @@ export default function Dashboard() {
                     src="src/assets/images/nezuko.jpg"
                     alt="Profile"
                     className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                    onClick={() => navigate("/profile")} // Navigate on click
                 />
             </aside>
         </div>
