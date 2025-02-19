@@ -4,10 +4,12 @@ import Sidebar from "../../components/sidebar.jsx";
 
 export default function Profile() {
     const navigate = useNavigate();
-    const [user, setUser] = useState({ name: "", email: "" });
+    const [user, setUser] = useState({ name: "", email: "", password: "" });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -74,6 +76,40 @@ export default function Profile() {
         }
     };
 
+    const handlePasswordUpdate = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/update-password', {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ currentPassword, newPassword }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update password');
+            }
+
+            const data = await response.json();
+            setSuccess(data.message || 'Password updated successfully!');
+            setCurrentPassword('');
+            setNewPassword('');
+        } catch (err) {
+            setError('Error updating password');
+        }
+    };
+
     return (
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
             <Sidebar />
@@ -111,6 +147,16 @@ export default function Profile() {
                                     />
                                 </div>
 
+                                <div>
+                                    <label className="text-gray-700 font-semibold">Hashed Password</label>
+                                    <input
+                                        type="text"
+                                        className="w-full p-2 rounded-lg bg-gray-200 bg-opacity-70"
+                                        value={user.password} // Assuming `password` contains the hashed password
+                                        readOnly
+                                    />
+                                </div>
+
                                 <button type="submit" className="py-2 px-4 rounded text-white bg-blue-500 hover:bg-blue-700 shadow-md">
                                     Update Profile
                                 </button>
@@ -119,6 +165,35 @@ export default function Profile() {
                             {success && <p className="mt-4 text-green-500">{success}</p>}
                         </>
                     )}
+
+                    <h3 className="mt-6 text-lg font-semibold text-gray-800">Update Password</h3>
+                    <form onSubmit={handlePasswordUpdate} className="w-full flex flex-col gap-4 mt-4">
+                        <div>
+                            <label className="text-gray-700 font-semibold">Current Password</label>
+                            <input
+                                type="password"
+                                className="w-full p-2 rounded-lg bg-gray-200 bg-opacity-70"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-gray-700 font-semibold">New Password</label>
+                            <input
+                                type="password"
+                                className="w-full p-2 rounded-lg bg-gray-200 bg-opacity-70"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+
+                        <button type="submit" className="py-2 px-4 rounded text-white bg-blue-500 hover:bg-blue-700 shadow-md">
+                            Update Password
+                        </button>
+                    </form>
 
                     <button
                         onClick={() => navigate(-1)}
