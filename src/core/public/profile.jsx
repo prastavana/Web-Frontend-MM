@@ -4,18 +4,21 @@ import Sidebar from "../../components/sidebar.jsx";
 
 export default function Profile() {
     const navigate = useNavigate();
-    const [user, setUser] = useState({ name: "", email: "" });
+    const [user, setUser ] = useState({ name: "", email: "", profilePicture: "" });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [image, setImage] = useState(null);
+    const [imagePreview, setImagePreview] = useState(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const token = localStorage.getItem('token');
+                const token = localStorage.getItem("token");
                 if (!token) {
+                    console.warn("No token found, redirecting to login.");
                     navigate("/login");
                     return;
                 }
@@ -24,17 +27,29 @@ export default function Profile() {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
+                        Authorization: `Bearer ${token}`,
                     },
                 });
 
                 if (!response.ok) {
-                    throw new Error("Failed to fetch profile");
+                    const errorData = await response.json();
+                    console.error("Error fetching profile:", errorData);
+                    throw new Error(errorData.message || "Failed to fetch profile");
                 }
 
                 const data = await response.json();
-                setUser(data);
+                console.log("Fetched user profile data:", data);
+                setUser ((prevUser ) => ({
+                    ...prevUser ,
+                    name: data.name || "",
+                    email: data.email || "",
+                    profilePicture: data.profilePicture ? `http://localhost:3000/${data.profilePicture}` : "",
+                }));
+                if (data.profilePicture) {
+                    setImagePreview(`http://localhost:3000/${data.profilePicture}`);
+                }
             } catch (error) {
+                console.error("Error in fetchProfile:", error);
                 setError("Error fetching profile");
             } finally {
                 setLoading(false);
@@ -43,6 +58,21 @@ export default function Profile() {
 
         fetchProfile();
     }, [navigate]);
+
+    useEffect(() => {
+        if (image) {
+            const objectUrl = URL.createObjectURL(image);
+            setImagePreview(objectUrl);
+            return () => URL.revokeObjectURL(objectUrl);
+        }
+    }, [image]);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setImage(file);
+        }
+    };
 
     const handleUpdate = async (e) => {
         e.preventDefault();
@@ -55,24 +85,22 @@ export default function Profile() {
             return;
         }
 
-        // Check if new passwords match
         if (newPassword && newPassword !== confirmPassword) {
             setError("New passwords do not match!");
             return;
         }
 
+        const formData = new FormData();
+        formData.append("name", user.name);
+        formData.append("email", user.email);
+        if (newPassword) formData.append("newPassword", newPassword);
+        if (image) formData.append("profilePicture", image);
+
         try {
-            const response = await fetch("http://localhost:3000/api/auth/update-password", {
+            const response = await fetch("http://localhost:3000/api/auth/update-profile", {
                 method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    name: user.name,
-                    email: user.email,
-                    newPassword: newPassword || undefined, // Only send new password if it's provided
-                }),
+                headers: { Authorization: `Bearer ${token}` },
+                body: formData,
             });
 
             if (!response.ok) {
@@ -82,13 +110,16 @@ export default function Profile() {
 
             const data = await response.json();
             setSuccess(data.message || "Profile updated successfully!");
-
-            // Redirect to login page after successful password update
-            navigate("/login");
-
-            // Reset password fields
-            setNewPassword('');
-            setConfirmPassword('');
+            setUser ((prevUser ) => ({
+                ...prevUser ,
+                name: data.name || "",
+                email: data.email || "",
+                profilePicture: data.profilePicture ? `http://localhost:3000/${data.profilePicture}` : "",
+            }));
+            setNewPassword("");
+            setConfirmPassword("");
+            setImage(null);
+            setImagePreview(data.profilePicture ? `http://localhost:3000/${data.profilePicture}` : null);
         } catch (err) {
             setError(err.message || "Error updating profile");
         }
@@ -108,6 +139,24 @@ export default function Profile() {
                         <p className="mt-4 text-red-500">{error}</p>
                     ) : (
                         <>
+                            <div className="relative mt-4">
+                                <div
+                                    onClick={() => document.getElementById("fileInput").click()}
+                                    className="w-32 h-32 rounded-full border-4 border-blue-500 cursor-pointer overflow-hidden"
+                                >
+                                    {imagePreview ? (
+                                        <img src={imagePreview} alt="Profile" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <img
+                                            src="src/assets/images/default-avatar.png" // Default avatar image
+                                            alt="Profile"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    )}
+                                </div>
+                                <input id="fileInput" type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                            </div>
+
                             <form onSubmit={handleUpdate} className="w-full flex flex-col gap-4 mt-4">
                                 <div>
                                     <label className="text-gray-700 font-semibold">Name</label>
@@ -115,7 +164,7 @@ export default function Profile() {
                                         type="text"
                                         className="w-full p-2 rounded-lg bg-gray-200 bg-opacity-70"
                                         value={user.name}
-                                        onChange={(e) => setUser({ ...user, name: e.target.value })}
+                                        onChange={(e) => setUser ((prevUser ) => ({ ...prevUser , name: e.target.value }))}
                                         required
                                     />
                                 </div>
@@ -126,7 +175,7 @@ export default function Profile() {
                                         type="email"
                                         className="w-full p-2 rounded-lg bg-gray-200 bg-opacity-70"
                                         value={user.email}
-                                        onChange={(e) => setUser({ ...user, email: e.target.value })}
+                                        onChange={(e) => setUser ((prevUser ) => ({ ...prevUser , email: e.target.value }))}
                                         required
                                     />
                                 </div>
@@ -160,10 +209,7 @@ export default function Profile() {
                         </>
                     )}
 
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="mt-6 py-2 px-4 rounded text-white bg-gray-500 hover:bg-gray-700 shadow-md"
-                    >
+                    <button onClick={() => navigate(-1)} className="mt-6 py-2 px-4 rounded text-white bg-gray-500 hover:bg-gray-700 shadow-md">
                         Go Back
                     </button>
                 </div>

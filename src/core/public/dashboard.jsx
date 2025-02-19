@@ -1,19 +1,48 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Sidebar from "../../components/sidebar.jsx";
 
 export default function Dashboard() {
     const navigate = useNavigate(); // Initialize navigate function
+    const [userProfile, setUserProfile] = useState(null); // State to hold user profile data
+
+    const fetchUserProfile = async () => {
+        try {
+            const response = await fetch("http://localhost:3000/api/auth/profile", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            console.log("Response Status:", response.status); // Log the response status
+
+            const data = await response.json(); // Parse the response as JSON
+            console.log("Fetched user profile data:", data); // Log the response body
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to fetch profile");
+            }
+
+            setUserProfile(data); // Set the user profile data
+        } catch (error) {
+            console.error("Error fetching user profile:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUserProfile(); // Call the function to fetch user profile on component mount
+    }, []);
 
     return (
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
             {/* Sidebar */}
-            <Sidebar/>
+            <Sidebar />
 
             {/* Main Content */}
             <main className="flex-1 p-6 flex justify-center items-start mt-6">
                 <div className="bg-white bg-opacity-60 backdrop-blur-lg rounded-3xl shadow-lg p-8 w-full max-w-7xl h-[85vh]">
-
                     {/* Header with Search */}
                     <header className="flex justify-between items-center mb-6">
                         <input
@@ -21,7 +50,7 @@ export default function Dashboard() {
                             placeholder="Search"
                             className="px-4 py-2 rounded-lg bg-gray-200 bg-opacity-70 w-1/3"
                         />
-                        <span className="text-gray-700">Hello, Prasta</span>
+                        <span className="text-gray-700">Hello, {userProfile ? userProfile.name : "User "}</span>
                     </header>
 
                     {/* Promo Section */}
@@ -31,7 +60,6 @@ export default function Dashboard() {
                             alt="Guitar and amplifier"
                             className="absolute top-0 left-0 w-full h-full object-cover"
                         />
-
                         <div className="absolute inset-0 flex flex-col justify-center items-start p-8 bg-black bg-opacity-50">
                             <h2 className="text-xl font-bold">Have not tried the lessons yet?</h2>
                             <p className="mt-2">
@@ -52,7 +80,6 @@ export default function Dashboard() {
                                 alt="Play along song"
                                 className="absolute top-0 left-0 w-full h-full object-cover object-center"
                             />
-
                             <div className="absolute inset-0 flex flex-col justify-center items-start p-6 bg-black bg-opacity-50">
                                 <h2 className="text-lg font-bold">Play along song with chords</h2>
                             </div>
@@ -65,7 +92,6 @@ export default function Dashboard() {
                                 alt="Tune your instrument"
                                 className="absolute top-0 left-0 w-full h-full object-cover object-center"
                             />
-
                             <div className="absolute inset-0 flex flex-col justify-center items-start p-6 bg-black bg-opacity-50">
                                 <h2 className="text-lg font-bold">Tune your instruments easily</h2>
                             </div>
@@ -76,12 +102,20 @@ export default function Dashboard() {
 
             {/* Right Sidebar with Profile Icon */}
             <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
-                <img
-                    src="src/assets/images/nezuko.jpg"
-                    alt="Profile"
-                    className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
-                    onClick={() => navigate("/profile")} // Navigate on click
-                />
+                {userProfile && userProfile.profilePicture ? (
+                    <img
+                        src={`http://localhost:3000/uploads/${userProfile.profilePicture}`} // Ensure the correct path
+                        alt="Profile"
+                        className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                        onClick={() => navigate("/profile")} // Navigate on click
+                    />
+                ) : (
+                    <img
+                        src="src/assets/images/nezuko.jpg" // Default avatar image
+                        alt="Profile"
+                        className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                    />
+                )}
             </aside>
         </div>
     );
