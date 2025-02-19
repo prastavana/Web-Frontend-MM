@@ -50,7 +50,7 @@ export default function Dashboard() {
                             placeholder="Search"
                             className="px-4 py-2 rounded-lg bg-gray-200 bg-opacity-70 w-1/3"
                         />
-                        <span className="text-gray-700">Hello, {userProfile ? userProfile.name : "User "}</span>
+                        <span className="text-gray-700">Hello, {userProfile ? userProfile.name : "User  "}</span>
                     </header>
 
                     {/* Promo Section */}
@@ -104,7 +104,7 @@ export default function Dashboard() {
             <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
                 {userProfile && userProfile.profilePicture ? (
                     <img
-                        src={`http://localhost:3000/uploads/${userProfile.profilePicture}`} // Ensure the correct path
+                        src={`http://localhost:3000/${userProfile.profilePicture}`} // Ensure the correct path
                         alt="Profile"
                         className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
                         onClick={() => navigate("/profile")} // Navigate on click
