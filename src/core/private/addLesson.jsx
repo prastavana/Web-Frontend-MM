@@ -48,11 +48,40 @@ export default function AddQuiz() {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Quizzes Data:", quizzes);
-        alert("Quizzes added successfully!");
-        // Here you can add API call to save quizzes in the database
+
+        const formData = new FormData();
+
+        quizzes.forEach((quiz) => {
+            formData.append('quizzes', JSON.stringify({
+                day: quiz.day,
+                question: quiz.question,
+                options: quiz.options,
+                correctAnswer: quiz.correctAnswer,
+            }));
+            formData.append('chordDiagram', quiz.chordDiagram); // Append the chord diagram file
+        });
+
+        try {
+            const response = await fetch('http://localhost:3000/api/quiz', { // Updated URL to match your backend
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to add quizzes');
+            }
+
+            const data = await response.json();
+            console.log("Quizzes Data:", data);
+            alert("Quizzes added successfully!");
+            // Reset quizzes or handle after submission
+            setQuizzes([{ day: "", question: "", chordDiagram: null, options: ["", "", "", ""], correctAnswer: "" }]);
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Error adding quizzes. Please try again.");
+        }
     };
 
     return (
