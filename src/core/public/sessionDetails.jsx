@@ -16,24 +16,19 @@ export default function SessionDetails() {
                 const response = await fetch(`http://localhost:3000/api/sessions`);
                 const data = await response.json();
 
-                // Log the fetched data
                 console.log("Fetched sessions data:", data);
 
-                // Filter sessions based on day and instrument
                 const filtered = data.filter(session => session.day === day && session.instrument === instrument);
 
-                // Log the filtered session data
                 console.log("Filtered sessions:", filtered);
 
                 setSessions(filtered);
-                // Set the duration time for enabling the button
                 if (filtered.length > 0) {
                     setTimeLeft(filtered[0].duration * 60); // Set time left in seconds
 
-                    // Check local storage for completion status
                     const completedSessionKey = `session_${filtered[0]._id}_completed`;
                     const isCompleted = localStorage.getItem(completedSessionKey) === "true";
-                    setCompleted(isCompleted); // Set completed state from local storage
+                    setCompleted(isCompleted);
                 }
             } catch (error) {
                 console.error("Error fetching sessions:", error);
@@ -44,12 +39,11 @@ export default function SessionDetails() {
     }, [day, instrument]);
 
     useEffect(() => {
-        // Timer to track duration
         if (timeLeft > 0) {
             const timer = setInterval(() => {
                 setTimeLeft(prev => {
                     if (prev <= 1) {
-                        setCanMarkComplete(true); // Enable the button after the time is up
+                        setCanMarkComplete(true);
                         clearInterval(timer);
                         return 0;
                     }
@@ -60,24 +54,20 @@ export default function SessionDetails() {
         }
     }, [timeLeft]);
 
-    // Function to convert YouTube URLs to embeddable format
     const getYouTubeEmbedUrl = (url) => {
         if (!url) return "";
-        // Extract video ID from the URL
         const match = url.match(/(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch\?v=|embed\/|v\/|.+\?v=))([^&\n]{11})/);
         return match ? `https://www.youtube.com/embed/${match[1]}` : "";
     };
 
-    // Function to mark the session as complete
     const markAsComplete = () => {
         if (!canMarkComplete) {
-            alert("Finish the practice first."); // Message if button is clicked too early
+            alert("Finish the practice first.");
             return;
         }
 
-        setCompleted(true); // Mark the session as completed
+        setCompleted(true);
 
-        // Store completion status in local storage
         const completedSessionKey = `session_${sessions[0]._id}_completed`;
         localStorage.setItem(completedSessionKey, "true");
     };
@@ -132,8 +122,12 @@ export default function SessionDetails() {
                                     ) : (
                                         <button
                                             onClick={markAsComplete}
-                                            disabled={!canMarkComplete} // Disable button until duration is complete
-                                            className={`mt-4 ${canMarkComplete ? 'bg-light-purple-500' : 'bg-gray-300 cursor-not-allowed'} text-white px-4 py-2 rounded-md hover:bg-purple-600`}
+                                            disabled={!canMarkComplete}
+                                            className={`mt-4 text-white px-4 py-2 rounded-md transition-all duration-500 ${
+                                                canMarkComplete
+                                                    ? 'bg-gradient-to-r from-[#99CCFF] via-[#C6B7FE] to-[#766E98] hover:opacity-90'
+                                                    : 'bg-[#CDC2F5] cursor-not-allowed'
+                                            }`}
                                         >
                                             {canMarkComplete ? "Mark as Complete" : `Practice for ${timeLeft} seconds`}
                                         </button>

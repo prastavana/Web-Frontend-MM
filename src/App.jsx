@@ -50,6 +50,8 @@ function App() {
     { path: "/chords", element: <ChordAndLyricPage /> },
     { path: "/song/:songId", element: <SongDetails /> }, // Added dynamic route for SongDetails
     { path: "/tuner", element: <TunerInst /> },
+    { path: "/lesson", element: <Lesson /> },
+    { path: "/addLesson", element: <AddLesson /> },
     { path: "/profile", element: < Profile/> },
     { path: "/session-details/:day/:instrument", element: <SessionDetails /> },
     { path: "*", element: <>Page not found</> },

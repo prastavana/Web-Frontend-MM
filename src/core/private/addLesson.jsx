@@ -1,29 +1,58 @@
 import React, { useState } from "react";
 import AdminSidebar from "../../components/adminSidebar.jsx";
 
-export default function AddLesson() {
-    const [lesson, setLesson] = useState({
-        title: "",
-        description: "",
-        level: "Beginner",
-        content: "",
-        file: null,
-    });
+export default function AddQuiz() {
+    const [quizzes, setQuizzes] = useState([
+        {
+            day: "",
+            question: "",
+            chordDiagram: null,
+            options: ["", "", "", ""],
+            correctAnswer: "",
+        },
+    ]);
 
-    const handleChange = (e) => {
+    const handleChange = (index, e) => {
         const { name, value } = e.target;
-        setLesson({ ...lesson, [name]: value });
+        const updatedQuizzes = [...quizzes];
+        updatedQuizzes[index] = { ...updatedQuizzes[index], [name]: value };
+        setQuizzes(updatedQuizzes);
     };
 
-    const handleFileChange = (e) => {
-        setLesson({ ...lesson, file: e.target.files[0] });
+    const handleOptionChange = (index, optionIndex, value) => {
+        const updatedQuizzes = [...quizzes];
+        updatedQuizzes[index].options[optionIndex] = value;
+        setQuizzes(updatedQuizzes);
+    };
+
+    const handleDiagramChange = (index, e) => {
+        const updatedQuizzes = [...quizzes];
+        updatedQuizzes[index].chordDiagram = e.target.files[0];
+        setQuizzes(updatedQuizzes);
+    };
+
+    const addQuiz = () => {
+        if (quizzes.length < 5) {
+            setQuizzes([
+                ...quizzes,
+                {
+                    day: "",
+                    question: "",
+                    chordDiagram: null,
+                    options: ["", "", "", ""],
+                    correctAnswer: "",
+                },
+            ]);
+        } else {
+            alert("You can only add up to 5 quizzes.");
+        }
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log("Lesson Data:", lesson);
-        alert("Lesson added successfully!");
-        // Here you can add API call to save lesson in the database
+        console.log("Quizzes Data:", quizzes);
+        alert("Quizzes added successfully!");
+        // Here you can add API call to save quizzes in the database
     };
 
     return (
@@ -34,77 +63,101 @@ export default function AddLesson() {
             {/* Main content area with centered box */}
             <div className="flex justify-center items-center w-full">
                 <div className="p-6 bg-white rounded-lg shadow-md w-[65%] ml-[-5%] h-[90vh] flex flex-col">
-                    <h2 className="text-2xl font-bold mb-4">Add a New Lesson</h2>
+                    <h2 className="text-2xl font-bold mb-4">Add New Quizzes</h2>
 
                     <div className="overflow-y-auto flex-grow p-2">
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            {/* Lesson Title */}
-                            <div>
-                                <label className="block font-medium">Lesson Title</label>
-                                <input
-                                    type="text"
-                                    name="title"
-                                    value={lesson.title}
-                                    onChange={handleChange}
-                                    className="w-full p-2 border rounded-md"
-                                    required
-                                />
-                            </div>
+                            {quizzes.map((quiz, index) => (
+                                <div key={index} className="mb-4 p-4 border rounded-md">
+                                    <h3 className="font-bold mb-2">{`Quiz ${index + 1}`}</h3>
+                                    {/* Day Selection only for the first quiz */}
+                                    {index === 0 && (
+                                        <div>
+                                            <label className="block font-medium">Select Day</label>
+                                            <select
+                                                name="day"
+                                                value={quiz.day}
+                                                onChange={(e) => handleChange(index, e)}
+                                                className="w-full p-2 border rounded-md"
+                                                required
+                                            >
+                                                <option value="" disabled>Select a day</option>
+                                                {Array.from({ length: 7 }, (_, i) => (
+                                                    <option key={i} value={`Day ${i + 1}`}>{`Day ${i + 1}`}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
 
-                            {/* Lesson Description */}
-                            <div>
-                                <label className="block font-medium">Description</label>
-                                <textarea
-                                    name="description"
-                                    value={lesson.description}
-                                    onChange={handleChange}
-                                    className="w-full p-2 border rounded-md"
-                                    rows="3"
-                                    required
-                                ></textarea>
-                            </div>
+                                    {/* Quiz Question */}
+                                    <div>
+                                        <label className="block font-medium">Quiz Question</label>
+                                        <input
+                                            type="text"
+                                            name="question"
+                                            value={quiz.question}
+                                            onChange={(e) => handleChange(index, e)}
+                                            className="w-full p-2 border rounded-md"
+                                            required
+                                        />
+                                    </div>
 
-                            {/* Difficulty Level */}
-                            <div>
-                                <label className="block font-medium">Difficulty Level</label>
-                                <select
-                                    name="level"
-                                    value={lesson.level}
-                                    onChange={handleChange}
-                                    className="w-full p-2 border rounded-md"
-                                >
-                                    <option value="Beginner">Beginner</option>
-                                    <option value="Intermediate">Intermediate</option>
-                                    <option value="Advanced">Advanced</option>
-                                </select>
-                            </div>
+                                    {/* Chord Diagram Upload */}
+                                    <div>
+                                        <label className="block font-medium">Upload Chord Diagram</label>
+                                        <input
+                                            type="file"
+                                            onChange={(e) => handleDiagramChange(index, e)}
+                                            className="w-full p-2 border rounded-md"
+                                            required
+                                        />
+                                    </div>
 
-                            {/* Lesson Content */}
-                            <div>
-                                <label className="block font-medium">Lesson Content</label>
-                                <textarea
-                                    name="content"
-                                    value={lesson.content}
-                                    onChange={handleChange}
-                                    className="w-full p-2 border rounded-md"
-                                    rows="5"
-                                    placeholder="Write lesson details here..."
-                                    required
-                                ></textarea>
-                            </div>
+                                    {/* Options for the Quiz */}
+                                    {quiz.options.map((option, optionIndex) => (
+                                        <div key={optionIndex} className="flex items-center">
+                                            <label className="block font-medium">{`Option ${optionIndex + 1}`}</label>
+                                            <input
+                                                type="text"
+                                                value={option}
+                                                onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
+                                                className="w-full p-2 border rounded-md ml-2"
+                                                required
+                                            />
+                                        </div>
+                                    ))}
 
-                            {/* File Upload (For PDFs/Videos) */}
-                            <div>
-                                <label className="block font-medium">Upload File (PDF/Video)</label>
-                                <input type="file" onChange={handleFileChange} className="w-full p-2 border rounded-md" />
-                            </div>
+                                    {/* Correct Answer */}
+                                    <div>
+                                        <label className="block font-medium">Correct Answer</label>
+                                        <input
+                                            type="text"
+                                            name="correctAnswer"
+                                            value={quiz.correctAnswer}
+                                            onChange={(e) => handleChange(index, e)}
+                                            className="w-full p-2 border rounded-md"
+                                            placeholder="Enter the correct answer"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+
+                            {/* Add Quiz Button */}
+                            <button
+                                type="button"
+                                onClick={addQuiz}
+                                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 w-full"
+                            >
+                                Add Another Quiz
+                            </button>
 
                             {/* Submit Button */}
                             <button
                                 type="submit"
                                 className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full"
                             >
-                                Add Lesson
+                                Submit All Quizzes
                             </button>
                         </form>
                     </div>
