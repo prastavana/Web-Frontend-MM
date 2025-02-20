@@ -45,8 +45,10 @@ export default function AddPracticeSession() {
             description: session.description,
             duration: session.duration,
             instructions: session.instructions,
-            file: session.mediaUrl, // Send YouTube URL as "file"
+            mediaUrl: session.mediaUrl, // Send YouTube URL as "mediaUrl"
         };
+
+        console.log("Form data being sent:", formData); // Log the form data
 
         try {
             const response = await axios.post("http://localhost:3000/api/sessions/", formData);
