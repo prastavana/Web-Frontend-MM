@@ -1,32 +1,29 @@
 import React, { useState } from "react";
 import AdminSidebar from "../../components/adminSidebar.jsx";
-import axios from "axios"; // Import axios
+import axios from "axios";
 
 export default function AddPracticeSession() {
     const [session, setSession] = useState({
-        instrument: "Guitar", // Default to Guitar
-        day: "Day 1", // Default to Day 1
+        instrument: "Guitar",
+        day: "Day 1",
         title: "",
         description: "",
         duration: "",
         instructions: "",
-        mediaUrl: "", // Renamed to mediaUrl for image/video URL
+        mediaUrl: "", // For YouTube URL
     });
 
-    const [loading, setLoading] = useState(false); // State to handle form submission loading
-    const [error, setError] = useState(""); // Error message state
-    const [success, setSuccess] = useState(""); // Success message state
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
-    // Handle form field changes
     const handleChange = (e) => {
         const { name, value } = e.target;
         setSession({ ...session, [name]: value });
     };
 
-    // Form submission handler
     const handleSubmit = async (e) => {
         e.preventDefault();
-        // Basic form validation
         if (!session.title || !session.description || !session.duration || !session.instructions) {
             setError("Please fill in all required fields.");
             return;
@@ -37,7 +34,7 @@ export default function AddPracticeSession() {
         }
 
         setLoading(true);
-        setError(""); // Clear previous error messages
+        setError("");
 
         const formData = {
             instrument: session.instrument,
@@ -46,19 +43,26 @@ export default function AddPracticeSession() {
             description: session.description,
             duration: session.duration,
             instructions: session.instructions,
-            mediaUrl: session.mediaUrl, // Added mediaUrl to form data
+            mediaUrl: session.mediaUrl, // Send YouTube URL
         };
 
-        try {
-            // Send data as JSON via POST request
-            const response = await axios.post("http://localhost:3000/api/sessions/", formData);
 
-            // Log the response to the console
+
+        try {
+            const response = await axios.post("http://localhost:3000/api/sessions/", formData);
             console.log('Response from server:', response);
 
-            // If the response is successful
-            if (response.status === 200) {
+            if (response.status === 201) {
                 setSuccess(`Practice session for ${session.instrument} - ${session.day} added successfully!`);
+                const formData = {
+                    instrument: session.instrument,
+                    day: session.day,
+                    title: session.title,
+                    description: session.description,
+                    duration: session.duration,
+                    instructions: session.instructions,
+                    mediaUrl: session.mediaUrl, // Send YouTube URL
+                };
                 setSession({ // Reset the form after success
                     instrument: "Guitar",
                     day: "Day 1",
@@ -66,12 +70,12 @@ export default function AddPracticeSession() {
                     description: "",
                     duration: "",
                     instructions: "",
-                    mediaUrl: "", // Reset mediaUrl
+                    mediaUrl: "",
                 });
             }
         } catch (err) {
             setError("An error occurred. Please try again.");
-            console.error("Error occurred during submission:", err); // Log error to console
+            console.error("Error occurred during submission:", err);
         } finally {
             setLoading(false);
         }
@@ -79,14 +83,10 @@ export default function AddPracticeSession() {
 
     return (
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
-            {/* Sidebar */}
             <AdminSidebar />
-
-            {/* Main content area with centered box */}
             <div className="flex justify-center items-center w-full">
                 <div className="p-6 bg-white rounded-lg shadow-md w-[65%] ml-[-5%] h-[90vh] flex flex-col">
                     <h2 className="text-2xl font-bold mb-4">Add a New Practice Session</h2>
-
                     <div className="overflow-y-auto flex-grow p-2">
                         <form onSubmit={handleSubmit} className="space-y-4">
                             {/* Select Instrument */}
@@ -104,7 +104,7 @@ export default function AddPracticeSession() {
                                 </select>
                             </div>
 
-                            {/* Select Day (Day 1 to Day 7) */}
+                            {/* Select Day */}
                             <div>
                                 <label className="block font-medium">Select Practice Day</label>
                                 <select
@@ -177,16 +177,16 @@ export default function AddPracticeSession() {
                                 ></textarea>
                             </div>
 
-                            {/* Media URL (Image/Video URL) */}
+                            {/* Media URL (YouTube URL) */}
                             <div>
-                                <label className="block font-medium">Enter Image/Video URL</label>
+                                <label className="block font-medium">Enter YouTube URL</label>
                                 <input
                                     type="url"
                                     name="mediaUrl"
                                     value={session.mediaUrl}
                                     onChange={handleChange}
                                     className="w-full p-2 border rounded-md"
-                                    placeholder="Paste image or video URL here"
+                                    placeholder="Paste YouTube URL here"
                                 />
                             </div>
 
@@ -196,32 +196,20 @@ export default function AddPracticeSession() {
                                 <div className="text-green-500">
                                     <p>{success}</p>
                                     {/* Conditionally render the mediaUrl if it's available */}
-                                    {session.mediaUrl && session.mediaUrl !== "" ? (
+                                    {session.mediaUrl && session.mediaUrl.includes("youtube.com") && (
                                         <div>
-                                            <p>Media URL: {session.mediaUrl}</p>
-                                            {/* If the URL is an image/video, display it as well */}
-                                            {session.mediaUrl.includes("http") && (
-                                                <div>
-                                                    <h3>Preview:</h3>
-                                                    {session.mediaUrl.includes("youtube.com") || session.mediaUrl.includes("youtu.be") ? (
-                                                        // If the media is a video, embed it
-                                                        <iframe
-                                                            src={session.mediaUrl}
-                                                            frameBorder="0"
-                                                            width="500"
-                                                            height="300"
-                                                            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                                                            allowFullScreen
-                                                            title="Video Preview"
-                                                        ></iframe>
-                                                    ) : (
-                                                        // If it's an image, display the image
-                                                        <img src={session.mediaUrl} alt="Practice Session Media" width="300" />
-                                                    )}
-                                                </div>
-                                            )}
+                                            <h3>Video Preview:</h3>
+                                            <iframe
+                                                src={session.mediaUrl.replace("watch?v=", "embed/")}
+                                                frameBorder="0"
+                                                width="500"
+                                                height="300"
+                                                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                                title="Video Preview"
+                                            ></iframe>
                                         </div>
-                                    ) : null}
+                                    )}
                                 </div>
                             )}
 
