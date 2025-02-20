@@ -10,12 +10,13 @@ export default function AddPracticeSession() {
         description: "",
         duration: "",
         instructions: "",
-        mediaUrl: "", // For YouTube URL
+        mediaUrl: "", // YouTube URL input
     });
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [savedFile, setSavedFile] = useState(""); // Stores the file URL from the backend
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,6 +25,7 @@ export default function AddPracticeSession() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (!session.title || !session.description || !session.duration || !session.instructions) {
             setError("Please fill in all required fields.");
             return;
@@ -43,27 +45,19 @@ export default function AddPracticeSession() {
             description: session.description,
             duration: session.duration,
             instructions: session.instructions,
-            mediaUrl: session.mediaUrl, // Send YouTube URL
+            file: session.mediaUrl, // Send YouTube URL as "file"
         };
-
-
 
         try {
             const response = await axios.post("http://localhost:3000/api/sessions/", formData);
-            console.log('Response from server:', response);
+            console.log("Response from server:", response.data);
 
             if (response.status === 201) {
                 setSuccess(`Practice session for ${session.instrument} - ${session.day} added successfully!`);
-                const formData = {
-                    instrument: session.instrument,
-                    day: session.day,
-                    title: session.title,
-                    description: session.description,
-                    duration: session.duration,
-                    instructions: session.instructions,
-                    mediaUrl: session.mediaUrl, // Send YouTube URL
-                };
-                setSession({ // Reset the form after success
+                setSavedFile(response.data.session.file); // Save the returned file URL
+
+                // Reset form fields after successful submission
+                setSession({
                     instrument: "Guitar",
                     day: "Day 1",
                     title: "",
@@ -75,10 +69,19 @@ export default function AddPracticeSession() {
             }
         } catch (err) {
             setError("An error occurred. Please try again.");
-            console.error("Error occurred during submission:", err);
+            console.error("Error during submission:", err);
         } finally {
             setLoading(false);
         }
+    };
+
+    // Convert YouTube URLs to embeddable format
+    const getYouTubeEmbedUrl = (url) => {
+        if (!url) return "";
+        if (url.includes("youtu.be")) {
+            return `https://www.youtube.com/embed/${url.split("youtu.be/")[1].split("?")[0]}`;
+        }
+        return url.replace("watch?v=", "embed/");
     };
 
     return (
@@ -195,12 +198,12 @@ export default function AddPracticeSession() {
                             {success && (
                                 <div className="text-green-500">
                                     <p>{success}</p>
-                                    {/* Conditionally render the mediaUrl if it's available */}
-                                    {session.mediaUrl && session.mediaUrl.includes("youtube.com") && (
+                                    {/* Show YouTube video preview if available */}
+                                    {savedFile && (
                                         <div>
                                             <h3>Video Preview:</h3>
                                             <iframe
-                                                src={session.mediaUrl.replace("watch?v=", "embed/")}
+                                                src={getYouTubeEmbedUrl(savedFile)}
                                                 frameBorder="0"
                                                 width="500"
                                                 height="300"
