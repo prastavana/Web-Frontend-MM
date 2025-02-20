@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Sidebar from "../../components/sidebar.jsx";
+import { FaCheckCircle } from 'react-icons/fa'; // Import tick icon
 
 export default function SessionDetails() {
     const { day, instrument } = useParams();
     const [sessions, setSessions] = useState([]);
+    const [completed, setCompleted] = useState(false);
+    const [canMarkComplete, setCanMarkComplete] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(0);
 
     useEffect(() => {
         const fetchSessions = async () => {
@@ -22,6 +26,15 @@ export default function SessionDetails() {
                 console.log("Filtered sessions:", filtered);
 
                 setSessions(filtered);
+                // Set the duration time for enabling the button
+                if (filtered.length > 0) {
+                    setTimeLeft(filtered[0].duration * 60); // Set time left in seconds
+
+                    // Check local storage for completion status
+                    const completedSessionKey = `session_${filtered[0]._id}_completed`;
+                    const isCompleted = localStorage.getItem(completedSessionKey) === "true";
+                    setCompleted(isCompleted); // Set completed state from local storage
+                }
             } catch (error) {
                 console.error("Error fetching sessions:", error);
             }
@@ -29,6 +42,23 @@ export default function SessionDetails() {
 
         fetchSessions();
     }, [day, instrument]);
+
+    useEffect(() => {
+        // Timer to track duration
+        if (timeLeft > 0) {
+            const timer = setInterval(() => {
+                setTimeLeft(prev => {
+                    if (prev <= 1) {
+                        setCanMarkComplete(true); // Enable the button after the time is up
+                        clearInterval(timer);
+                        return 0;
+                    }
+                    return prev - 1;
+                });
+            }, 1000);
+            return () => clearInterval(timer);
+        }
+    }, [timeLeft]);
 
     // Function to convert YouTube URLs to embeddable format
     const getYouTubeEmbedUrl = (url) => {
@@ -39,29 +69,17 @@ export default function SessionDetails() {
     };
 
     // Function to mark the session as complete
-    const markAsComplete = async (sessionId) => {
-        try {
-            const response = await fetch(`http://localhost:3000/api/sessions/${sessionId}/complete`, {
-                method: 'PATCH', // Use PATCH to update the session
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ completed: true }), // Assuming you have a completed field
-            });
-            if (response.ok) {
-                // Optionally, you can update the local state to reflect the change
-                setSessions(prevSessions =>
-                    prevSessions.map(session =>
-                        session._id === sessionId ? { ...session, completed: true } : session
-                    )
-                );
-                alert("Session marked as complete!");
-            } else {
-                console.error("Error marking session as complete:", response.statusText);
-            }
-        } catch (error) {
-            console.error("Error:", error);
+    const markAsComplete = () => {
+        if (!canMarkComplete) {
+            alert("Finish the practice first."); // Message if button is clicked too early
+            return;
         }
+
+        setCompleted(true); // Mark the session as completed
+
+        // Store completion status in local storage
+        const completedSessionKey = `session_${sessions[0]._id}_completed`;
+        localStorage.setItem(completedSessionKey, "true");
     };
 
     return (
@@ -106,12 +124,20 @@ export default function SessionDetails() {
                                     )}
 
                                     {/* Mark as Complete Button */}
-                                    <button
-                                        onClick={() => markAsComplete(session._id)}
-                                        className="mt-4 bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                                    >
-                                        Mark as Complete
-                                    </button>
+                                    {completed ? (
+                                        <div className="mt-4 flex items-center text-green-600">
+                                            <FaCheckCircle className="mr-2" />
+                                            <span>Session Completed</span>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={markAsComplete}
+                                            disabled={!canMarkComplete} // Disable button until duration is complete
+                                            className={`mt-4 ${canMarkComplete ? 'bg-light-purple-500' : 'bg-gray-300 cursor-not-allowed'} text-white px-4 py-2 rounded-md hover:bg-purple-600`}
+                                        >
+                                            {canMarkComplete ? "Mark as Complete" : `Practice for ${timeLeft} seconds`}
+                                        </button>
+                                    )}
                                 </div>
                             ))
                         )}
