@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Sidebar from "../../components/sidebar.jsx";
+import { FaCheckCircle } from "react-icons/fa"; // Import the FaCheckCircle icon
 
 export default function Lesson() {
     const [quizzes, setQuizzes] = useState([]);
-    const [selectedDay, setSelectedDay] = useState(null);
     const [selectedCategory, setSelectedCategory] = useState("Ukulele");
+    const [incorrectAnswers, setIncorrectAnswers] = useState([]); // Track incorrect answers
+    const navigate = useNavigate(); // Initialize useNavigate
 
     useEffect(() => {
-        // Fetch quizzes data from the API
         const fetchQuizzes = async () => {
             try {
                 const response = await fetch("http://localhost:3000/api/quiz/getquiz"); // Your API endpoint
@@ -24,9 +26,22 @@ export default function Lesson() {
 
     // Get unique days for the selected category
     const uniqueDays = [...new Set(quizzes
-        .filter(quiz => quiz.instrument.toLowerCase() === selectedCategory.toLowerCase()) // Convert to lowercase for comparison
+        .filter(quiz => quiz.instrument.toLowerCase() === selectedCategory.toLowerCase())
         .map(quiz => quiz.day)
     )];
+
+    // Check completed days from localStorage
+    const completedDays = JSON.parse(localStorage.getItem("completedDays")) || [];
+
+    // Handle day click to navigate to lesson details page
+    const handleDayClick = (day) => {
+        navigate(`/lesson-details/${day}`); // Navigate to lesson details page with selected day
+    };
+
+    // Check if the selected answer is incorrect
+    const isDayWrong = (day) => {
+        return incorrectAnswers.includes(day);
+    };
 
     return (
         <div className="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen flex items-start justify-center">
@@ -61,41 +76,23 @@ export default function Lesson() {
                                 {uniqueDays.map((day) => (
                                     <div
                                         key={day}
-                                        onClick={() => setSelectedDay(day)}
-                                        className={`p-4 w-32 bg-gray-200 rounded-lg shadow-md cursor-pointer hover:bg-gray-300 transition duration-200 ${
-                                            selectedDay === day ? "bg-gray-300 font-semibold" : ""
+                                        onClick={() => handleDayClick(day)} // Handle day click
+                                        className={`p-4 w-32 rounded-lg shadow-md cursor-pointer hover:bg-gray-300 transition duration-200 relative ${
+                                            isDayWrong(day) ? "bg-red-200 opacity-40" : "bg-gray-200"
                                         }`}
                                     >
                                         <p className="text-center">{day}</p>
+                                        {/* Show styled green checkmark if the day is completed and not wrong */}
+                                        {completedDays.includes(day) && !isDayWrong(day) && (
+                                            <span className="absolute top-2 right-2 text-green-600 ml-2">
+                                                <FaCheckCircle />
+                                            </span>
+                                        )}
+                                        {/* Logic for displaying incorrect answers can be added here */}
                                     </div>
                                 ))}
                             </div>
                         )}
-                    </div>
-
-                    {/* Quizzes List */}
-                    <div className="space-y-4">
-                        {selectedDay ? (
-                            quizzes
-                                .filter(quiz => quiz.day === selectedDay && quiz.instrument.toLowerCase() === selectedCategory.toLowerCase())
-                                .map((quiz) => (
-                                    <div key={quiz._id} className="p-4 bg-gray-100 rounded-lg shadow-md hover:bg-gray-200">
-                                        <h3 className="text-xl font-semibold">{quiz.day} - Quizzes</h3>
-                                        {quiz.quizzes.map((q, index) => (
-                                            <div key={index} className="mt-2">
-                                                <p className="font-medium">{q.question}</p>
-                                                <p className="text-sm text-gray-500">{q.options.join(", ")}</p>
-                                            </div>
-                                        ))}
-                                        <a
-                                            href={`/quiz/${quiz._id}`}
-                                            className="mt-4 inline-block bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                                        >
-                                            View Quiz
-                                        </a>
-                                    </div>
-                                ))
-                        ) : null}
                     </div>
                 </div>
                 {/* Right Sidebar with Profile Icon */}

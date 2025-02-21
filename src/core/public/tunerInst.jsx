@@ -57,54 +57,63 @@ const TunerComponent = () => {
     return (
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
             <Sidebar />
-            <div className="bg-white p-9 rounded-l shadow-2xl w-[70%] flex flex-col items-center">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6">Instrument Tuner</h2>
-                <div className="flex gap-4 mb-6">
-                    {Object.keys(instruments).map((inst) => (
-                        <button
-                            key={inst}
-                            onClick={() => setInstrument(inst)}
-                            className={`px-6 py-3 rounded-lg text-lg font-medium transition-all duration-300 shadow-md ${
-                                instrument === inst
-                                    ? "bg-blue-500 text-white"
-                                    : "bg-gray-300 text-gray-700 hover:bg-gray-400"
-                            }`}
-                        >
-                            {inst.charAt(0).toUpperCase() + inst.slice(1)}
-                        </button>
-                    ))}
-                </div>
-                <h3 className="text-xl font-semibold text-gray-700 mb-4">Select String</h3>
-                <div className="flex flex-wrap justify-center gap-4 mb-6">
-                    {stringNotes.map((stringNote, index) => (
-                        <button
-                            key={index}
-                            onClick={() => setSelectedString(index)}
-                            className={`px-5 py-3 rounded-lg text-lg font-medium transition-all duration-300 shadow-md ${
-                                selectedString === index
-                                    ? "bg-orange-500 text-white"
-                                    : "bg-gray-500 text-white hover:bg-gray-600"
-                            }`}
-                        >
-                            {stringNote}
-                        </button>
-                    ))}
-                </div>
-                <Meter cents={note.cents} />
-                <Note name={note.name} octave={note.octave} />
-                <p className="text-2xl text-gray-900 mt-4 font-semibold">{note.frequency.toFixed(1)} Hz</p>
-                {tuningComplete && (
-                    <div className="mt-6 text-center">
-                        <p className="text-green-500 font-semibold text-xl">Tuning completed for this string!</p>
-                        <button
-                            onClick={handleNextString}
-                            className="mt-4 px-6 py-3 rounded-lg text-lg font-medium bg-green-500 text-white hover:bg-green-600 transition-all duration-300 shadow-md"
-                        >
-                            Next String
-                        </button>
+            <div className="flex justify-center items-center w-[70%] mt-4">
+                <div className="p-2 bg-white rounded-lg shadow-md min-h-[400px] w-full max-w-md">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Instrument Tuner</h2>
+                    <div className="flex gap-2 mb-4 justify-center">
+                        {Object.keys(instruments).map((inst) => (
+                            <button
+                                key={inst}
+                                onClick={() => setInstrument(inst)}
+                                className={`px-4 py-2 rounded-lg text-lg font-medium transition-all duration-300 shadow-md ${
+                                    instrument === inst
+                                        ? "bg-light-blue-300 text-white"
+                                        : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+                                }`}
+                            >
+                                {inst.charAt(0).toUpperCase() + inst.slice(1)}
+                            </button>
+                        ))}
                     </div>
-                )}
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">Select String</h3>
+                    <div className="flex flex-wrap justify-center gap-2 mb-4">
+                        {stringNotes.map((stringNote, index) => (
+                            <button
+                                key={index}
+                                onClick={() => setSelectedString(index)}
+                                className={`px-4 py-2 rounded-lg text-lg font-medium transition-all duration-300 shadow-md ${
+                                    selectedString === index
+                                        ? "bg-purple-300 text-white"
+                                        : "bg-gray-500 text-white hover:bg-gray-600"
+                                }`}
+                            >
+                                {stringNote}
+                            </button>
+                        ))}
+                    </div>
+                    <Meter cents={note.cents} />
+                    <Note name={note.name} octave={note.octave} />
+                    <p className="text-xl text-gray-900 mt-2 font-semibold text-center">{note.frequency.toFixed(1)} Hz</p>
+                    {tuningComplete && (
+                        <div className="mt-4 text-center">
+                            <p className="text-green-500 font-semibold text-lg">Tuning completed for this string!</p>
+                            <button
+                                onClick={handleNextString}
+                                className="mt-2 px-4 py-2 rounded-lg text-lg font-medium bg-green-500 text-white hover:bg-green-600 transition-all duration-300 shadow-md"
+                            >
+                                Next String
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
+            <aside className="w-24 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
+                <img
+                    src="/src/assets/images/nezuko.jpg"
+                    alt="Profile"
+                    className="w-14 h-14 rounded-full border border-gray-300 cursor-pointer mt-2"
+                />
+            </aside>
         </div>
     );
 };

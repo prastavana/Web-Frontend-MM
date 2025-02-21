@@ -19,6 +19,7 @@ import SongDetails from "./core/public/songDetails.jsx";
 import TunerInst from "./core/public/tunerInst.jsx";
 import Profile from "./core/public/profile.jsx";
 import SessionDetails from "./core/public/sessionDetails.jsx";
+import LessonDetails from "./core/public/lessonDetails.jsx";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -54,6 +55,8 @@ function App() {
     { path: "/addLesson", element: <AddLesson /> },
     { path: "/profile", element: < Profile/> },
     { path: "/session-details/:day/:instrument", element: <SessionDetails /> },
+    {path: "/lesson-details/:day",element:<LessonDetails />},
+
     { path: "*", element: <>Page not found</> },
   ];
 
