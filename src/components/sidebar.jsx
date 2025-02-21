@@ -23,7 +23,7 @@ const Sidebar = () => {
                         <li>
                             <button
                                 className="text-gray-500 hover:text-purple-300"
-                                onClick={() => navigate("/lessons")}
+                                onClick={() => navigate("/lesson")}
                             >
                                 Lessons
                             </button>

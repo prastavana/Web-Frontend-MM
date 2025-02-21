@@ -2,15 +2,10 @@ import React, { useState } from "react";
 import AdminSidebar from "../../components/adminSidebar.jsx";
 
 export default function AddQuiz() {
-    const [quizzes, setQuizzes] = useState([
-        {
-            day: "",
-            question: "",
-            chordDiagram: null,
-            options: ["", "", "", ""],
-            correctAnswer: "",
-        },
-    ]);
+    const [day, setDay] = useState(""); // Store the selected day
+    const [quizzes, setQuizzes] = useState([]); // Store quizzes in an array
+    const [docxFiles, setDocxFiles] = useState([]);
+    const [instrument, setInstrument] = useState("guitar"); // Store selected instrument
 
     const handleChange = (index, e) => {
         const { name, value } = e.target;
@@ -27,8 +22,12 @@ export default function AddQuiz() {
 
     const handleDiagramChange = (index, e) => {
         const updatedQuizzes = [...quizzes];
-        updatedQuizzes[index].chordDiagram = e.target.files[0];
+        updatedQuizzes[index].chordDiagram = e.target.files[0]; // Store the file object
         setQuizzes(updatedQuizzes);
+    };
+
+    const handleDocxFileChange = (event) => {
+        setDocxFiles([...event.target.files]);
     };
 
     const addQuiz = () => {
@@ -36,7 +35,6 @@ export default function AddQuiz() {
             setQuizzes([
                 ...quizzes,
                 {
-                    day: "",
                     question: "",
                     chordDiagram: null,
                     options: ["", "", "", ""],
@@ -50,34 +48,47 @@ export default function AddQuiz() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         const formData = new FormData();
 
-        quizzes.forEach((quiz) => {
-            formData.append('quizzes', JSON.stringify({
-                day: quiz.day,
+        // Create a single quiz object with the selected day and the quizzes array
+        const quizData = {
+            day,
+            instrument,
+            quizzes: quizzes.map((quiz) => ({
                 question: quiz.question,
                 options: quiz.options,
                 correctAnswer: quiz.correctAnswer,
-            }));
-            formData.append('chordDiagram', quiz.chordDiagram); // Append the chord diagram file
+                chordDiagram: quiz.chordDiagram ? quiz.chordDiagram.name : null, // Store the filename or path
+            })),
+        };
+
+        formData.append("quizData", JSON.stringify(quizData));
+
+        quizzes.forEach((quiz) => {
+            if (quiz.chordDiagram) {
+                formData.append("chordDiagrams", quiz.chordDiagram);
+            }
+        });
+
+        docxFiles.forEach((file) => {
+            formData.append("docxFiles", file);
         });
 
         try {
-            const response = await fetch('http://localhost:3000/api/quiz', { // Updated URL to match your backend
-                method: 'POST',
+            const response = await fetch("http://localhost:3000/api/quiz/addquiz", {
+                method: "POST",
                 body: formData,
             });
 
             if (!response.ok) {
-                throw new Error('Failed to add quizzes');
+                throw new Error("Failed to add quizzes");
             }
 
-            const data = await response.json();
-            console.log("Quizzes Data:", data);
             alert("Quizzes added successfully!");
-            // Reset quizzes or handle after submission
-            setQuizzes([{ day: "", question: "", chordDiagram: null, options: ["", "", "", ""], correctAnswer: "" }]);
+            setQuizzes([]); // Reset quizzes after submission
+            setDocxFiles([]);
+            setDay(""); // Reset the day selection after submission
+            setInstrument("guitar"); // Reset the instrument selection after submission
         } catch (error) {
             console.error("Error:", error);
             alert("Error adding quizzes. Please try again.");
@@ -86,39 +97,42 @@ export default function AddQuiz() {
 
     return (
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
-            {/* Sidebar */}
             <AdminSidebar />
-
-            {/* Main content area with centered box */}
             <div className="flex justify-center items-center w-full">
                 <div className="p-6 bg-white rounded-lg shadow-md w-[65%] ml-[-5%] h-[90vh] flex flex-col">
                     <h2 className="text-2xl font-bold mb-4">Add New Quizzes</h2>
-
                     <div className="overflow-y-auto flex-grow p-2">
-                        <form onSubmit={handleSubmit} className="space-y-4">
+                        <form onSubmit={handleSubmit} className="space-y-4" encType="multipart/form-data">
+                            <div>
+                                <label className="block font-medium">Select Day</label>
+                                <select
+                                    value={day}
+                                    onChange={(e) => setDay(e.target.value)}
+                                    className="w-full p-2 border rounded-md"
+                                    required
+                                >
+                                    <option value="" disabled>Select a day</option>
+                                    {Array.from({ length: 7 }, (_, i) => (
+                                        <option key={i} value={`Day ${i + 1}`}>{`Day ${i + 1}`}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block font-medium">Select Instrument</label>
+                                <select
+                                    value={instrument}
+                                    onChange={(e) => setInstrument(e.target.value)}
+                                    className="w-full p-2 border rounded-md"
+                                    required
+                                >
+                                    <option value="guitar">Guitar</option>
+                                    <option value="ukulele">Ukulele</option>
+                                    <option value="piano">Piano</option>
+                                </select>
+                            </div>
                             {quizzes.map((quiz, index) => (
                                 <div key={index} className="mb-4 p-4 border rounded-md">
                                     <h3 className="font-bold mb-2">{`Quiz ${index + 1}`}</h3>
-                                    {/* Day Selection only for the first quiz */}
-                                    {index === 0 && (
-                                        <div>
-                                            <label className="block font-medium">Select Day</label>
-                                            <select
-                                                name="day"
-                                                value={quiz.day}
-                                                onChange={(e) => handleChange(index, e)}
-                                                className="w-full p-2 border rounded-md"
-                                                required
-                                            >
-                                                <option value="" disabled>Select a day</option>
-                                                {Array.from({ length: 7 }, (_, i) => (
-                                                    <option key={i} value={`Day ${i + 1}`}>{`Day ${i + 1}`}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                    )}
-
-                                    {/* Quiz Question */}
                                     <div>
                                         <label className="block font-medium">Quiz Question</label>
                                         <input
@@ -130,19 +144,15 @@ export default function AddQuiz() {
                                             required
                                         />
                                     </div>
-
-                                    {/* Chord Diagram Upload */}
                                     <div>
                                         <label className="block font-medium">Upload Chord Diagram</label>
                                         <input
                                             type="file"
+                                            accept="image/*"
                                             onChange={(e) => handleDiagramChange(index, e)}
                                             className="w-full p-2 border rounded-md"
-                                            required
                                         />
                                     </div>
-
-                                    {/* Options for the Quiz */}
                                     {quiz.options.map((option, optionIndex) => (
                                         <div key={optionIndex} className="flex items-center">
                                             <label className="block font-medium">{`Option ${optionIndex + 1}`}</label>
@@ -155,8 +165,6 @@ export default function AddQuiz() {
                                             />
                                         </div>
                                     ))}
-
-                                    {/* Correct Answer */}
                                     <div>
                                         <label className="block font-medium">Correct Answer</label>
                                         <input
@@ -171,20 +179,16 @@ export default function AddQuiz() {
                                     </div>
                                 </div>
                             ))}
-
-                            {/* Add Quiz Button */}
                             <button
                                 type="button"
                                 onClick={addQuiz}
-                                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 w-full"
+                                className="bg-blue-300 text-white px-4 py-2 rounded-md hover:bg-green-600 w-full"
                             >
                                 Add Another Quiz
                             </button>
-
-                            {/* Submit Button */}
                             <button
                                 type="submit"
-                                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full"
+                                className="bg-purple-300 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full"
                             >
                                 Submit All Quizzes
                             </button>
