@@ -6,6 +6,11 @@ export default class Tuner {
         this.bufferSize = bufferSize;
         this.pitchFinder = new PitchFinder.YIN({ sampleRate: this.sampleRate });
         this.lastFrequency = null;
+        this.audioContext = null; // Added to keep track of the audio context
+        this.microphone = null; // Added to keep track of the microphone source
+        this.analyser = null; // Added to keep track of the analyser
+        this.dataArray = null; // Added to keep track of the data array
+        this.detectPitch = null; // Added to store the pitch detection function
     }
 
     start(onNoteDetected) {
@@ -18,7 +23,8 @@ export default class Tuner {
                 this.microphone.connect(this.analyser);
                 this.dataArray = new Float32Array(this.bufferSize);
 
-                const detectPitch = () => {
+                // Define the pitch detection function
+                this.detectPitch = () => {
                     this.analyser.getFloatTimeDomainData(this.dataArray);
                     const frequency = this.pitchFinder(this.dataArray);
 
@@ -26,11 +32,28 @@ export default class Tuner {
                         const note = this.getNoteData(frequency);
                         onNoteDetected(note);
                     }
-                    requestAnimationFrame(detectPitch);
+                    requestAnimationFrame(this.detectPitch);
                 };
-                detectPitch();
+
+                // Start detecting pitch
+                this.detectPitch();
             })
             .catch((err) => console.error("Microphone access denied:", err));
+    }
+
+    stop() {
+        if (this.microphone) {
+            this.microphone.disconnect();
+            this.microphone = null;
+        }
+        if (this.audioContext) {
+            this.audioContext.close();
+            this.audioContext = null;
+        }
+        if (this.detectPitch) {
+            cancelAnimationFrame(this.detectPitch);
+            this.detectPitch = null;
+        }
     }
 
     isStableFrequency(frequency) {

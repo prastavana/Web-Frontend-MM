@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import Tuner from "../../components/tuner.js";
+import Tuner from "../../components/tuner.js"; // Ensure the path is correct
 import Meter from "../../components/meter.jsx";
 import Note from "../../components/note.jsx";
 import Sidebar from "../../components/sidebar.jsx";
@@ -31,6 +31,8 @@ const TunerComponent = () => {
     const [selectedString, setSelectedString] = useState(0);
     const [note, setNote] = useState({ name: "A", octave: 4, frequency: 440, cents: 0 });
     const [tuningComplete, setTuningComplete] = useState(false);
+    const [tuningMessage, setTuningMessage] = useState("");
+    const [messageVisible, setMessageVisible] = useState(false);
 
     const stringNotes = instruments[instrument];
     const currentStringNote = stringNotes[selectedString];
@@ -38,28 +40,57 @@ const TunerComponent = () => {
     useEffect(() => {
         const tuner = new Tuner();
         tuner.start(setNote);
+        return () => {
+            tuner.stop(); // Ensure to stop the tuner when the component unmounts
+        };
     }, []);
 
     useEffect(() => {
         const correctFrequency = tuningFrequencies[instrument][currentStringNote];
-        setTuningComplete(Math.abs(note.frequency - correctFrequency) <= 1);
+        if (Math.abs(note.frequency - correctFrequency) <= 1) {
+            setTuningComplete(true);
+            setTuningMessage(`${currentStringNote} is in tune!`);
+            setMessageVisible(true);
+
+            // Keep the message visible for 10 seconds
+            const timer = setTimeout(() => {
+                setMessageVisible(false);
+                setTuningMessage(""); // Optionally clear the message
+                handleNextString(); // Automatically move to the next string
+            }, 10000);
+
+            return () => clearTimeout(timer); // Clean up the timer
+        } else {
+            setTuningComplete(false);
+            setMessageVisible(false);
+            setTuningMessage("");
+        }
     }, [note, currentStringNote, instrument]);
 
     const handleNextString = () => {
         if (selectedString < stringNotes.length - 1) {
             setSelectedString(selectedString + 1);
             setTuningComplete(false);
+            setTuningMessage(""); // Clear message when moving to the next string
+            setMessageVisible(false); // Hide the message immediately when switching strings
         } else {
             alert("Tuning complete for all strings!");
         }
+    };
+
+    const handleSelectString = (index) => {
+        setSelectedString(index);
+        setTuningComplete(false); // Reset tuning for the selected string
+        setTuningMessage(""); // Clear message for the new string
+        setMessageVisible(false); // Hide the message when selecting a new string
     };
 
     return (
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
             <Sidebar />
             <div className="flex justify-center items-center w-[70%] mt-4">
-                <div className="p-2 bg-white rounded-lg shadow-md min-h-[400px] w-full max-w-md">
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4 text-center">Instrument Tuner</h2>
+                <div className="p-4 bg-white rounded-lg shadow-md min-h-[600px] w-full max-w-2xl">
+                    <h2 className="text-2xl font-bold text-gray-400 mb-4 text-center">Instrument Tuner</h2>
                     <div className="flex gap-2 mb-4 justify-center">
                         {Object.keys(instruments).map((inst) => (
                             <button
@@ -67,8 +98,8 @@ const TunerComponent = () => {
                                 onClick={() => setInstrument(inst)}
                                 className={`px-4 py-2 rounded-lg text-lg font-medium transition-all duration-300 shadow-md ${
                                     instrument === inst
-                                        ? "bg-light-blue-300 text-white"
-                                        : "bg-gray-300 text-gray-700 hover:bg-gray-400"
+                                        ? "bg-blue-200 text-black"
+                                        : "bg-gray-300 text-gray-700 hover:bg-purple-400"
                                 }`}
                             >
                                 {inst.charAt(0).toUpperCase() + inst.slice(1)}
@@ -80,11 +111,11 @@ const TunerComponent = () => {
                         {stringNotes.map((stringNote, index) => (
                             <button
                                 key={index}
-                                onClick={() => setSelectedString(index)}
+                                onClick={() => handleSelectString(index)}
                                 className={`px-4 py-2 rounded-lg text-lg font-medium transition-all duration-300 shadow-md ${
                                     selectedString === index
                                         ? "bg-purple-300 text-white"
-                                        : "bg-gray-500 text-white hover:bg-gray-600"
+                                        : "bg-gray-400 text-white hover:bg-gray-600"
                                 }`}
                             >
                                 {stringNote}
@@ -94,15 +125,17 @@ const TunerComponent = () => {
                     <Meter cents={note.cents} />
                     <Note name={note.name} octave={note.octave} />
                     <p className="text-xl text-gray-900 mt-2 font-semibold text-center">{note.frequency.toFixed(1)} Hz</p>
-                    {tuningComplete && (
+                    {messageVisible && (
                         <div className="mt-4 text-center">
-                            <p className="text-green-500 font-semibold text-lg">Tuning completed for this string!</p>
-                            <button
-                                onClick={handleNextString}
-                                className="mt-2 px-4 py-2 rounded-lg text-lg font-medium bg-green-500 text-white hover:bg-green-600 transition-all duration-300 shadow-md"
-                            >
-                                Next String
-                            </button>
+                            <p className="text-green-500 font-semibold text-lg">{tuningMessage}</p>
+                            {tuningComplete && (
+                                <button
+                                    onClick={handleNextString}
+                                    className="mt-2 px-4 py-2 rounded-lg text-lg font-medium bg-green-500 text-white hover:bg-green-600 transition-all duration-300 shadow-md"
+                                >
+                                    Next String
+                                </button>
+                            )}
                         </div>
                     )}
                 </div>
