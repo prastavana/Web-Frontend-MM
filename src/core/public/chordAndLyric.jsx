@@ -41,7 +41,6 @@ export default function ChordAndLyric() {
 
                 const data = await response.json();
                 setUserProfile(data);
-                fetchFavorites(data._id); // Fetch favorites when user profile is loaded
             } catch (error) {
                 console.error("Error fetching user profile:", error);
             }
@@ -49,25 +48,6 @@ export default function ChordAndLyric() {
 
         fetchUserProfile();
     }, []);
-
-    // Fetch favorite songs for the user
-    const fetchFavorites = async (userId) => {
-        try {
-            const response = await fetch(`http://localhost:3000/api/favorites`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
-
-            const data = await response.json();
-            const favorites = new Set(data.songIds); // Create a set of liked song IDs
-            setLikedSongs(favorites);
-        } catch (error) {
-            console.error("Error fetching favorites:", error);
-        }
-    };
 
     // Function to handle liking a song
     const handleLikeSong = async (songId) => {

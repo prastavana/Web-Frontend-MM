@@ -1,39 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Sidebar from "../../components/sidebar.jsx";
-import { FaCheckCircle, FaHeart } from "react-icons/fa"; // Import the FaCheckCircle and FaHeart icons
+import { FaCheckCircle } from "react-icons/fa"; // Import the FaCheckCircle icon
 
 export default function Lesson() {
     const [quizzes, setQuizzes] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("Ukulele");
     const [incorrectAnswers, setIncorrectAnswers] = useState([]); // Track incorrect answers
-    const [userProfile, setUserProfile] = useState(null); // State to hold user profile data
     const navigate = useNavigate(); // Initialize useNavigate
+    const [userProfile, setUserProfile] = useState(null); // State to hold user profile data
 
     useEffect(() => {
-        const fetchUserProfile = async () => {
-            try {
-                const response = await fetch("http://localhost:3000/api/auth/profile", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error("Failed to fetch profile");
-                }
-
-                const data = await response.json();
-                setUserProfile(data);
-            } catch (error) {
-                console.error("Error fetching user profile:", error);
-            }
-        };
-
-        fetchUserProfile();
-
         const fetchQuizzes = async () => {
             try {
                 const response = await fetch("http://localhost:3000/api/quiz/getquiz"); // Your API endpoint
@@ -46,7 +23,29 @@ export default function Lesson() {
         };
 
         fetchQuizzes();
-    }, []);
+    const fetchUserProfile = async () => {
+        try {
+            const response = await fetch("http://localhost:3000/api/auth/profile", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch profile");
+            }
+
+            const data = await response.json();
+            setUserProfile(data);
+        } catch (error) {
+            console.error("Error fetching user profile:", error);
+        }
+    };
+
+    fetchUserProfile();
+     }, []);
 
     // Get unique days for the selected category
     const uniqueDays = [...new Set(quizzes
@@ -67,29 +66,9 @@ export default function Lesson() {
         return incorrectAnswers.includes(day);
     };
 
-    // Handle liking a lesson
-    const handleLikeLesson = async (day) => {
-        try {
-            const response = await fetch(`http://localhost:3000/api/lessons/like/${day}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to like the lesson");
-            }
-            // Optionally, you can update localStorage or state here to reflect the like
-        } catch (error) {
-            console.error("Error liking lesson:", error);
-        }
-    };
-
     return (
         <div className="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen flex items-start justify-center">
-            <Sidebar />
+            <Sidebar/>
             <main className="flex-1 p-6 flex justify-center items-start mt-4">
                 <div
                     className="bg-white bg-opacity-60 backdrop-blur-lg rounded-3xl shadow-lg p-8 w-full max-w-7xl h-[85vh]">
@@ -130,19 +109,10 @@ export default function Lesson() {
                                         {/* Show styled green checkmark if the day is completed and not wrong */}
                                         {completedDays.includes(day) && !isDayWrong(day) && (
                                             <span className="absolute top-2 right-2 text-green-600 ml-2">
-                                                <FaCheckCircle />
+                                                <FaCheckCircle/>
                                             </span>
                                         )}
-                                        {/* Like button */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation(); // Prevent day click
-                                                handleLikeLesson(day);
-                                            }}
-                                            className="absolute bottom-2 right-2 text-red-500"
-                                        >
-                                            <FaHeart />
-                                        </button>
+                                        {/* Logic for displaying incorrect answers can be added here */}
                                     </div>
                                 ))}
                             </div>
