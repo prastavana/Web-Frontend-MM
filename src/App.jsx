@@ -53,7 +53,6 @@ function App() {
     { path: "/song/:songId", element: <SongDetails /> }, // Added dynamic route for SongDetails
     { path: "/tuner", element: <TunerInst /> },
     { path: "/lesson", element: <Lesson /> },
-    { path: "/addLesson", element: <AddLesson /> },
     { path: "/profile", element: < Profile/> },
     { path: "/session-details/:day/:instrument", element: <SessionDetails /> },
     {path: "/lesson-details/:day",element:<LessonDetails />},

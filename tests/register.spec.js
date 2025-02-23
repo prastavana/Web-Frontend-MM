@@ -9,9 +9,9 @@ test('registration form', async ({ page }) => {
     await expect(page).toHaveTitle(/Melody Mentor/);
 
     // Fill out the registration form
-    await page.fill('input[placeholder="Name"]', 'Test User 2');
-    await page.fill('input[placeholder="Email"]', 'testuser3@example.com');
-    await page.fill('input[placeholder="Password"]', 'password1');
+    await page.fill('input[placeholder="Name"]', 'Test User 9');
+    await page.fill('input[placeholder="Email"]', 'testuser9@example.com');
+    await page.fill('input[placeholder="Password"]', 'password19');
 
     // Click the register button
     await page.click('button:has-text("Register Now")');
@@ -24,3 +24,4 @@ test('registration form', async ({ page }) => {
     await page.waitForTimeout(2000); // Wait for the redirect
     await expect(page).toHaveURL(/\/login$/); // Verify the URL is now the login page
 });
+

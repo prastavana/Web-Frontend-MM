@@ -23,29 +23,29 @@ export default function Lesson() {
         };
 
         fetchQuizzes();
-    const fetchUserProfile = async () => {
-        try {
-            const response = await fetch("http://localhost:3000/api/auth/profile", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
+        const fetchUserProfile = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/api/auth/profile", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
 
-            if (!response.ok) {
-                throw new Error("Failed to fetch profile");
+                if (!response.ok) {
+                    throw new Error("Failed to fetch profile");
+                }
+
+                const data = await response.json();
+                setUserProfile(data);
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
             }
+        };
 
-            const data = await response.json();
-            setUserProfile(data);
-        } catch (error) {
-            console.error("Error fetching user profile:", error);
-        }
-    };
-
-    fetchUserProfile();
-     }, []);
+        fetchUserProfile();
+    }, []);
 
     // Get unique days for the selected category
     const uniqueDays = [...new Set(quizzes
