@@ -62,19 +62,12 @@ const Sidebar = () => {
                         <li>
                             <button
                                 className="text-gray-500 hover:text-purple-300"
-                                onClick={() => navigate("/liked-lessons")}
-                            >
-                                Liked Lessons
-                            </button>
-                        </li>
-                        <li>
-                            <button
-                                className="text-gray-500  hover:text-purple-300"
                                 onClick={() => navigate("/liked-songs")}
                             >
                                 Liked Songs
                             </button>
                         </li>
+
                     </ul>
                 </div>
             </nav>

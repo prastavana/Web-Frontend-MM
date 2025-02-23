@@ -10,7 +10,7 @@ const LoginPage = ({ setIsAuthenticated, setIsAdmin }) => {
     const [isAnimating, setIsAnimating] = useState(false);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [errorMessage, setErrorMessage] = useState(null);
+    const [errorMessage, setErrorMessage] = useState(""); // Change to empty string
     const navigate = useNavigate();
 
     const handleSignUpClick = () => {

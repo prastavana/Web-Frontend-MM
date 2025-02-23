@@ -20,6 +20,7 @@ import TunerInst from "./core/public/tunerInst.jsx";
 import Profile from "./core/public/profile.jsx";
 import SessionDetails from "./core/public/sessionDetails.jsx";
 import LessonDetails from "./core/public/lessonDetails.jsx";
+import LikedSongs from "./core/public/likedSongs.jsx";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -56,6 +57,7 @@ function App() {
     { path: "/profile", element: < Profile/> },
     { path: "/session-details/:day/:instrument", element: <SessionDetails /> },
     {path: "/lesson-details/:day",element:<LessonDetails />},
+    {path: "/liked-songs", element:<LikedSongs />},
 
     { path: "*", element: <>Page not found</> },
   ];
