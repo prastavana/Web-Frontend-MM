@@ -1,16 +1,29 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "../../components/sidebar.jsx";
-import axios from "axios"; // Ensure axios is installed
-import {Link, useNavigate} from "react-router-dom"; // For navigation to song details
+import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 export default function ChordAndLyric() {
-    const [songs, setSongs] = useState([]); // Store songs data
+    const [songs, setSongs] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("Ukulele");
-    const [fontSize, setFontSize] = useState(16);
-    const [autoScroll, setAutoScroll] = useState(false);
-    const [scrollSpeed, setScrollSpeed] = useState(2);
-    const [userProfile, setUserProfile] = useState(null); // State to hold user profile data
+    const [userProfile, setUserProfile] = useState(null);
     const navigate = useNavigate();
+    const [likedSongs, setLikedSongs] = useState(new Set());
+
+    useEffect(() => {
+        const fetchSongs = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/api/songs/getsongs?instrument=${selectedCategory.toLowerCase()}`);
+                setSongs(response.data.songs);
+            } catch (error) {
+                console.error("Error fetching songs:", error);
+            }
+        };
+
+        fetchSongs();
+    }, [selectedCategory]);
+
     useEffect(() => {
         const fetchUserProfile = async () => {
             try {
@@ -28,42 +41,67 @@ export default function ChordAndLyric() {
 
                 const data = await response.json();
                 setUserProfile(data);
+                fetchFavorites(data._id); // Fetch favorites when user profile is loaded
             } catch (error) {
                 console.error("Error fetching user profile:", error);
             }
         };
 
         fetchUserProfile();
-        // Fetch songs for the selected instrument category
-        const fetchSongs = async () => {
-            try {
-                const response = await axios.get(`http://localhost:3000/api/songs/getsongs?instrument=${selectedCategory.toLowerCase()}`);
-                setSongs(response.data.songs); // Set the fetched songs in state
-            } catch (error) {
-                console.error("Error fetching songs:", error);
-            }
-        };
+    }, []);
 
-        fetchSongs(); // Fetch songs when the page loads or when category changes
-    }, [selectedCategory]);
+    // Fetch favorite songs for the user
+    const fetchFavorites = async (userId) => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/favorites`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
 
-
-    useEffect(() => {
-        let scrollInterval;
-        if (autoScroll) {
-            scrollInterval = setInterval(() => {
-                window.scrollBy(0, scrollSpeed);
-            }, 50);
+            const data = await response.json();
+            const favorites = new Set(data.songIds); // Create a set of liked song IDs
+            setLikedSongs(favorites);
+        } catch (error) {
+            console.error("Error fetching favorites:", error);
         }
-        return () => clearInterval(scrollInterval);
-    }, [autoScroll, scrollSpeed]);
+    };
+
+    // Function to handle liking a song
+    const handleLikeSong = async (songId) => {
+        try {
+            const response = await fetch(`http://localhost:3000/api/favorites/songs`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({ songId }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to toggle favorite");
+            }
+
+            // Update the liked songs set based on the response
+            if (likedSongs.has(songId)) {
+                likedSongs.delete(songId);
+            } else {
+                likedSongs.add(songId);
+            }
+            setLikedSongs(new Set(likedSongs)); // Update state
+        } catch (error) {
+            console.error("Error liking song:", error);
+        }
+    };
 
     return (
         <div className="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen flex items-start justify-center">
-            <Sidebar/>
+            <Sidebar />
             <main className="flex-1 p-12 flex flex-col items-start ml-4">
-                <div
-                    className="bg-white bg-opacity-60 backdrop-blur-lg rounded-3xl shadow-lg p-8 w-full max-w-7xl h-[85vh]">
+                <div className="bg-white bg-opacity-60 backdrop-blur-lg rounded-3xl shadow-lg p-8 w-full max-w-7xl h-[85vh]">
                     <h2 className="text-2xl font-bold mb-4">Available {selectedCategory} Chords</h2>
                     <div className="flex justify-start space-x-8 mb-6">
                         {["Ukulele", "Guitar", "Piano"].map((category) => (
@@ -86,12 +124,21 @@ export default function ChordAndLyric() {
                         ) : (
                             songs.map((song) => (
                                 <div
-                                    key={song._id} // Use song._id for unique keys
-                                    className="p-4 bg-gray-100 rounded-lg shadow-md hover:bg-gray-200"
+                                    key={song._id}
+                                    className="p-4 bg-gray-100 rounded-lg shadow-md hover:bg-gray-200 flex justify-between items-center"
                                 >
                                     <Link to={`/song/${song._id}`} className="text-xl font-semibold cursor-pointer">
-                                        {song.songName} {/* Make song title clickable */}
+                                        {song.songName}
                                     </Link>
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleLikeSong(song._id);
+                                        }}
+                                        className="text-red-500 ml-4"
+                                    >
+                                        {likedSongs.has(song._id) ? <FaHeart /> : <FaRegHeart />}
+                                    </button>
                                 </div>
                             ))
                         )}
