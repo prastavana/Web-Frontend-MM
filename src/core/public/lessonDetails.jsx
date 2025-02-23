@@ -11,8 +11,31 @@ export default function LessonDetails() {
     const [selectedAnswers, setSelectedAnswers] = useState([]);
     const [isCorrect, setIsCorrect] = useState(null);
     const [feedbackMessage, setFeedbackMessage] = useState("");
+    const [userProfile, setUserProfile] = useState(null); // State to hold user profile data
 
     useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/api/auth/profile", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch profile");
+                }
+
+                const data = await response.json();
+                setUserProfile(data);
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+            }
+        };
+
+        fetchUserProfile();
         const fetchQuizzes = async () => {
             try {
                 const response = await fetch("http://localhost:3000/api/quiz/getquiz");
@@ -85,10 +108,11 @@ export default function LessonDetails() {
 
     return (
         <div className="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen flex">
-            <Sidebar />
-            <main className="flex-1 p-6 flex justify-center items-start mt-4">
+            <Sidebar/>
+            <main className="flex-1 p-12 flex flex-col items-start ml-4">
                 {quizzes.length > 0 ? (
-                    <div className="p-4 bg-white rounded-lg shadow-md w-[70%] mt-8 min-h-[450px] ml-32">
+                    <div
+                        className="bg-white bg-opacity-60 backdrop-blur-lg rounded-3xl shadow-lg p-8 w-full max-w-7xl h-[85vh]">
                         <h2 className="text-xl font-bold mb-3">Lesson for {day}</h2>
                         <h3 className="text-lg font-semibold mb-2">
                             Quiz {currentIndex + 1}: {quizzes[currentIndex].question}
@@ -135,7 +159,7 @@ export default function LessonDetails() {
                                 disabled={currentIndex === 0}
                                 className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-300 hover:bg-gray-400 disabled:opacity-50"
                             >
-                                <ChevronLeft size={18} />
+                                <ChevronLeft size={18}/>
                             </button>
 
                             <button
@@ -143,7 +167,7 @@ export default function LessonDetails() {
                                 disabled={currentIndex === quizzes.length - 1}
                                 className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-300 hover:bg-gray-400 disabled:opacity-50"
                             >
-                                <ChevronRight size={18} />
+                                <ChevronRight size={18}/>
                             </button>
                         </div>
 
@@ -160,14 +184,24 @@ export default function LessonDetails() {
                 ) : (
                     <p className="text-center text-gray-500">No quizzes available for this day.</p>
                 )}
-                <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
+            </main>
+            <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
+                {userProfile && userProfile.profilePicture ? (
+                    <img
+                        src={`http://localhost:3000/${userProfile.profilePicture}`}
+                        alt="Profile"
+                        className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                        onClick={() => navigate("/profile")}
+                    />
+                ) : (
                     <img
                         src="/src/assets/images/nezuko.jpg"
                         alt="Profile"
                         className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                        onClick={() => navigate("/profile")}
                     />
-                </aside>
-            </main>
+                )}
+            </aside>
         </div>
     );
 }

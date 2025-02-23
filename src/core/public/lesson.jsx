@@ -8,6 +8,7 @@ export default function Lesson() {
     const [selectedCategory, setSelectedCategory] = useState("Ukulele");
     const [incorrectAnswers, setIncorrectAnswers] = useState([]); // Track incorrect answers
     const navigate = useNavigate(); // Initialize useNavigate
+    const [userProfile, setUserProfile] = useState(null); // State to hold user profile data
 
     useEffect(() => {
         const fetchQuizzes = async () => {
@@ -22,7 +23,29 @@ export default function Lesson() {
         };
 
         fetchQuizzes();
-    }, []);
+    const fetchUserProfile = async () => {
+        try {
+            const response = await fetch("http://localhost:3000/api/auth/profile", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch profile");
+            }
+
+            const data = await response.json();
+            setUserProfile(data);
+        } catch (error) {
+            console.error("Error fetching user profile:", error);
+        }
+    };
+
+    fetchUserProfile();
+     }, []);
 
     // Get unique days for the selected category
     const uniqueDays = [...new Set(quizzes
@@ -45,9 +68,10 @@ export default function Lesson() {
 
     return (
         <div className="bg-gradient-to-br from-purple-100 to-blue-100 min-h-screen flex items-start justify-center">
-            <Sidebar />
+            <Sidebar/>
             <main className="flex-1 p-6 flex justify-center items-start mt-4">
-                <div className="p-6 bg-white rounded-lg shadow-md w-[90%] mt-8 min-h-[550px] ml-32">
+                <div
+                    className="bg-white bg-opacity-60 backdrop-blur-lg rounded-3xl shadow-lg p-8 w-full max-w-7xl h-[85vh]">
                     <h2 className="text-2xl font-bold mb-4">Available {selectedCategory} Lessons</h2>
 
                     {/* Category Text Links */}
@@ -85,7 +109,7 @@ export default function Lesson() {
                                         {/* Show styled green checkmark if the day is completed and not wrong */}
                                         {completedDays.includes(day) && !isDayWrong(day) && (
                                             <span className="absolute top-2 right-2 text-green-600 ml-2">
-                                                <FaCheckCircle />
+                                                <FaCheckCircle/>
                                             </span>
                                         )}
                                         {/* Logic for displaying incorrect answers can be added here */}
@@ -95,15 +119,24 @@ export default function Lesson() {
                         )}
                     </div>
                 </div>
-                {/* Right Sidebar with Profile Icon */}
-                <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
+            </main>
+            <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
+                {userProfile && userProfile.profilePicture ? (
+                    <img
+                        src={`http://localhost:3000/${userProfile.profilePicture}`}
+                        alt="Profile"
+                        className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                        onClick={() => navigate("/profile")}
+                    />
+                ) : (
                     <img
                         src="src/assets/images/nezuko.jpg"
                         alt="Profile"
                         className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                        onClick={() => navigate("/profile")}
                     />
-                </aside>
-            </main>
+                )}
+            </aside>
         </div>
     );
 }

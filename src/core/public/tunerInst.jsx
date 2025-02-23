@@ -3,6 +3,7 @@ import Tuner from "../../components/tuner.js"; // Ensure the path is correct
 import Meter from "../../components/meter.jsx";
 import Note from "../../components/note.jsx";
 import Sidebar from "../../components/sidebar.jsx";
+import {useNavigate} from "react-router-dom";
 
 const instruments = {
     guitar: ["E (Low)", "A", "D", "G", "B", "E (High)"],
@@ -33,9 +34,10 @@ const TunerComponent = () => {
     const [tuningComplete, setTuningComplete] = useState(false);
     const [tuningMessage, setTuningMessage] = useState("");
     const [messageVisible, setMessageVisible] = useState(false);
-
+    const navigate = useNavigate();
     const stringNotes = instruments[instrument];
     const currentStringNote = stringNotes[selectedString];
+    const [userProfile, setUserProfile] = useState(null); // State to hold user profile data
 
     useEffect(() => {
         const tuner = new Tuner();
@@ -84,12 +86,35 @@ const TunerComponent = () => {
         setTuningMessage(""); // Clear message for the new string
         setMessageVisible(false); // Hide the message when selecting a new string
     };
+    const fetchUserProfile = async () => {
+        try {
+            const response = await fetch("http://localhost:3000/api/auth/profile", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch profile");
+            }
+
+            const data = await response.json();
+            setUserProfile(data);
+        } catch (error) {
+            console.error("Error fetching user profile:", error);
+        }
+    };
+
+    fetchUserProfile();
 
     return (
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
-            <Sidebar />
-            <div className="flex justify-center items-center w-[70%] mt-4">
-                <div className="p-4 bg-white rounded-lg shadow-md min-h-[600px] w-full max-w-2xl">
+            <Sidebar/>
+            <main className="flex-1 p-6 flex justify-center items-start mt-4">
+                <div
+                    className="bg-white bg-opacity-60 backdrop-blur-lg rounded-3xl shadow-lg p-8 w-full max-w-7xl h-[85vh]">
                     <h2 className="text-2xl font-bold text-gray-400 mb-4 text-center">Instrument Tuner</h2>
                     <div className="flex gap-2 mb-4 justify-center">
                         {Object.keys(instruments).map((inst) => (
@@ -122,8 +147,8 @@ const TunerComponent = () => {
                             </button>
                         ))}
                     </div>
-                    <Meter cents={note.cents} />
-                    <Note name={note.name} octave={note.octave} />
+                    <Meter cents={note.cents}/>
+                    <Note name={note.name} octave={note.octave}/>
                     <p className="text-xl text-gray-900 mt-2 font-semibold text-center">{note.frequency.toFixed(1)} Hz</p>
                     {messageVisible && (
                         <div className="mt-4 text-center">
@@ -139,13 +164,23 @@ const TunerComponent = () => {
                         </div>
                     )}
                 </div>
-            </div>
-            <aside className="w-24 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
-                <img
-                    src="/src/assets/images/nezuko.jpg"
-                    alt="Profile"
-                    className="w-14 h-14 rounded-full border border-gray-300 cursor-pointer mt-2"
-                />
+            </main>
+            <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
+                {userProfile && userProfile.profilePicture ? (
+                    <img
+                        src={`http://localhost:3000/${userProfile.profilePicture}`}
+                        alt="Profile"
+                        className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                        onClick={() => navigate("/profile")}
+                    />
+                ) : (
+                    <img
+                        src="src/assets/images/nezuko.jpg"
+                        alt="Profile"
+                        className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                        onClick={() => navigate("/profile")}
+                    />
+                )}
             </aside>
         </div>
     );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import Sidebar from "../../components/sidebar.jsx";
 import { FaCheckCircle } from 'react-icons/fa'; // Import tick icon
 
@@ -9,8 +9,32 @@ export default function SessionDetails() {
     const [completed, setCompleted] = useState(false);
     const [canMarkComplete, setCanMarkComplete] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0);
+    const [userProfile, setUserProfile] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
+        const fetchUserProfile = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/api/auth/profile", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch profile");
+                }
+
+                const data = await response.json();
+                setUserProfile(data);
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+            }
+        };
+
+        fetchUserProfile();
         const fetchSessions = async () => {
             try {
                 const response = await fetch(`http://localhost:3000/api/sessions`);
@@ -37,6 +61,7 @@ export default function SessionDetails() {
 
         fetchSessions();
     }, [day, instrument]);
+
 
     useEffect(() => {
         if (timeLeft > 0) {
@@ -74,10 +99,11 @@ export default function SessionDetails() {
 
     return (
         <div className="h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex">
-            <Sidebar />
+            <Sidebar/>
 
-            <div className="flex justify-center items-center w-full">
-                <div className="p-6 bg-white rounded-lg shadow-md w-[65%] ml-[-5%] h-[90vh] flex flex-col">
+            <main className="flex-1 p-12 flex flex-col items-start ml-4">
+                <div
+                    className="bg-white bg-opacity-60 backdrop-blur-lg rounded-3xl shadow-lg p-8 w-full max-w-7xl h-[85vh]">
                     <h2 className="text-2xl font-bold mb-4">Sessions for {day} - {instrument}</h2>
 
                     <div className="overflow-y-auto flex-grow p-2 space-y-4">
@@ -85,7 +111,8 @@ export default function SessionDetails() {
                             <p className="text-center text-gray-500">No sessions available.</p>
                         ) : (
                             sessions.map((session) => (
-                                <div key={session._id} className="p-4 bg-gray-100 rounded-lg shadow-md hover:bg-gray-200">
+                                <div key={session._id}
+                                     className="p-4 bg-gray-100 rounded-lg shadow-md hover:bg-gray-200">
                                     <h3 className="text-xl font-semibold">{session.title}</h3>
                                     <p className="text-sm text-gray-600">{session.description}</p>
                                     <div className="mt-2">
@@ -116,7 +143,7 @@ export default function SessionDetails() {
                                     {/* Mark as Complete Button */}
                                     {completed ? (
                                         <div className="mt-4 flex items-center text-green-600">
-                                            <FaCheckCircle className="mr-2" />
+                                            <FaCheckCircle className="mr-2"/>
                                             <span>Session Completed</span>
                                         </div>
                                     ) : (
@@ -137,7 +164,24 @@ export default function SessionDetails() {
                         )}
                     </div>
                 </div>
-            </div>
+            </main>
+            <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
+                {userProfile && userProfile.profilePicture ? (
+                    <img
+                        src={`http://localhost:3000/${userProfile.profilePicture}`}
+                        alt="Profile"
+                        className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                        onClick={() => navigate("/profile")}
+                    />
+                ) : (
+                    <img
+                        src="/src/assets/images/nezuko.jpg"
+                        alt="Profile"
+                        className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                        onClick={() => navigate("/profile")}
+                    />
+                )}
+            </aside>
         </div>
     );
 }

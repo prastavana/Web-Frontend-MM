@@ -3,36 +3,32 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate
 import Sidebar from "../../components/sidebar.jsx";
 
 export default function Dashboard() {
-    const navigate = useNavigate(); // Initialize navigate function
-    const [userProfile, setUserProfile] = useState(null); // State to hold user profile data
-
-    const fetchUserProfile = async () => {
-        try {
-            const response = await fetch("http://localhost:3000/api/auth/profile", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            });
-
-            console.log("Response Status:", response.status); // Log the response status
-
-            const data = await response.json(); // Parse the response as JSON
-            console.log("Fetched user profile data:", data); // Log the response body
-
-            if (!response.ok) {
-                throw new Error(data.message || "Failed to fetch profile");
-            }
-
-            setUserProfile(data); // Set the user profile data
-        } catch (error) {
-            console.error("Error fetching user profile:", error);
-        }
-    };
+    const navigate = useNavigate();
+    const [userProfile, setUserProfile] = useState(null);
 
     useEffect(() => {
-        fetchUserProfile(); // Call the function to fetch user profile on component mount
+        const fetchUserProfile = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/api/auth/profile", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch profile");
+                }
+
+                const data = await response.json();
+                setUserProfile(data);
+            } catch (error) {
+                console.error("Error fetching user profile:", error);
+            }
+        };
+
+        fetchUserProfile();
     }, []);
 
     return (
@@ -50,7 +46,7 @@ export default function Dashboard() {
                             placeholder="Search"
                             className="px-4 py-2 rounded-lg bg-gray-200 bg-opacity-70 w-1/3"
                         />
-                        <span className="text-gray-700">Hello, {userProfile ? userProfile.name : "User  "}</span>
+                        <span className="text-gray-700">Hello, {userProfile ? userProfile.name : "User"}</span>
                     </header>
 
                     {/* Promo Section */}
@@ -62,19 +58,22 @@ export default function Dashboard() {
                         />
                         <div className="absolute inset-0 flex flex-col justify-center items-start p-8 bg-black bg-opacity-50">
                             <h2 className="text-xl font-bold">Have not tried the lessons yet?</h2>
-                            <p className="mt-2">
-                                Dive into the world of music for free, learn different instruments at your own pace.
-                            </p>
-                            <button className="mt-4 py-2 px-4 rounded text-white bg-gradient-to-r from-[#99CCFF] via-[#C6B7FE] to-[#766E98] hover:from-purple-500 hover:to-purple-700 shadow-md">
+                            <p className="mt-2">Dive into the world of music for free, learn different instruments at your own pace.</p>
+                            <button
+                                className="mt-4 py-2 px-4 rounded text-white bg-gradient-to-r from-[#99CCFF] via-[#C6B7FE] to-[#766E98] hover:from-purple-500 hover:to-purple-700 shadow-md"
+                                onClick={() => navigate("/lesson")} // Navigate to lessons page
+                            >
                                 Get Started
                             </button>
                         </div>
                     </div>
 
-                    {/* Flex Container for the two boxes */}
+                    {/* Flex Container for Two Boxes */}
                     <div className="mt-12 flex gap-8">
-                        {/* Play Along Song with Chords */}
-                        <div className="relative h-48 w-1/2 rounded-xl overflow-hidden bg-gradient-to-r from-blue-400 to-blue-500 text-white shadow-lg">
+                        <div
+                            className="relative h-48 w-1/2 rounded-xl overflow-hidden bg-gradient-to-r from-blue-400 to-blue-500 text-white shadow-lg cursor-pointer"
+                            onClick={() => navigate("/chords")} // Navigate to chords page
+                        >
                             <img
                                 src="src/assets/images/guitar2.jpg"
                                 alt="Play along song"
@@ -85,8 +84,10 @@ export default function Dashboard() {
                             </div>
                         </div>
 
-                        {/* Tune Your Instruments */}
-                        <div className="relative h-48 w-1/2 rounded-xl overflow-hidden bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg">
+                        <div
+                            className="relative h-48 w-1/2 rounded-xl overflow-hidden bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg cursor-pointer"
+                            onClick={() => navigate("/tuner")} // Navigate to tuner page
+                        >
                             <img
                                 src="src/assets/images/pick.jpg"
                                 alt="Tune your instrument"
@@ -104,16 +105,17 @@ export default function Dashboard() {
             <aside className="w-36 bg-white bg-opacity-10 backdrop-blur-lg p-2 flex flex-col items-center">
                 {userProfile && userProfile.profilePicture ? (
                     <img
-                        src={`http://localhost:3000/${userProfile.profilePicture}`} // Ensure the correct path
+                        src={`http://localhost:3000/${userProfile.profilePicture}`}
                         alt="Profile"
                         className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
-                        onClick={() => navigate("/profile")} // Navigate on click
+                        onClick={() => navigate("/profile")}
                     />
                 ) : (
                     <img
-                        src="src/assets/images/nezuko.jpg" // Default avatar image
+                        src="src/assets/images/nezuko.jpg"
                         alt="Profile"
                         className="w-16 h-16 rounded-full border border-gray-300 cursor-pointer mt-4"
+                        onClick={() => navigate("/profile")}
                     />
                 )}
             </aside>
